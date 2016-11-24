@@ -2,7 +2,7 @@
 <package>
   <name>place_detection_isl</name>
   <version>0.0.0</version>
-  <description>placeDetectionISL</description>
+  <description>place_detection_isl</description>
 
   <maintainer email="hakan.karaoguz@boun.edu.tr">Hakan Karaoguz</maintainer>
 
