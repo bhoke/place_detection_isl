@@ -13,7 +13,7 @@ public:
 
    // Mat img;
 
-    //Mat filter;
+    static Mat convertToIlluminationInvariant(const Mat& image, float lambda);
 
     static void readFilter(QString fileName, int filterSize, bool transpose, bool save, bool show);
 

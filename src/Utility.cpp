@@ -64,10 +64,6 @@ void LearnedPlace::calculateMeanInvariant()
     // Mat avg;
 
     cv::reduce(this->memberInvariants,this->meanInvariant,1,CV_REDUCE_AVG);
-
-
-
-
 }
 
 TemporalWindow::TemporalWindow()

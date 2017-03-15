@@ -23,7 +23,6 @@ double compareHistHK( InputArray _H1, InputArray _H2, int method );
 
 double compareHKCHISQR(cv::Mat input1, cv::Mat input2);
 
-
 // TODO Temporal Window ve basepointleri DB ye kaydedecegiz
 
 ros::Timer timer;
@@ -130,7 +129,6 @@ bool createDirectories(QString previousMemoryPath)
     }
 
     return true;
-
 }
 
 bool saveParameters(QString filepath)
@@ -210,7 +208,8 @@ void startStopCallback(const std_msgs::Int16 startstopSignal)
             if(!detector.usePreviousMemory)
             {
                 canCreateDir = createDirectories("");
-            }else
+            }
+            else
             {
                 canCreateDir = createDirectories(QString::fromStdString(detector.previousMemoryPath));
             }
@@ -226,12 +225,12 @@ void startStopCallback(const std_msgs::Int16 startstopSignal)
                 //std::cout<<"Ssstr data: "<<sstr.data<<std::endl;
                 QString rawInvariantsName = mainDirectoryPath;
 
-                rawInvariantsName.append("/rawInvariants.txt");
+                rawInvariantsName.append("/Place Indices.txt");
                 rawInvariants.setFileName(rawInvariantsName);
 
                 if(rawInvariants.open(QFile::WriteOnly))
                 {
-                    qDebug() << "index file is opened";
+                    qDebug() << "Index File is Opened";
                     strim.setDevice(&rawInvariants);
                 }
 
@@ -255,9 +254,6 @@ void startStopCallback(const std_msgs::Int16 startstopSignal)
     else if(startstopSignal.data == -1)
     {
         sendLastPlaceandShutdown = true;
-
-        //   ros::shutdown();
-
 
     }
     // Pause the node
@@ -532,7 +528,12 @@ int main (int argc, char** argv)
                             ros::spinOnce();
 
                             // loop.sleep();
-
+                            strim << "Place ID: " << detector.currentPlace->id << "\n";
+                            for(MatIterator_<int> it = detector.currentPlace->memberIds.begin<int>();
+                                it != detector.currentPlace->memberIds.end<int>();++it)
+                            {
+                                strim << *it << "\n";
+                            }
 
                             detector.placeID++;
                         }
@@ -543,7 +544,6 @@ int main (int argc, char** argv)
                     }
 
                     ros::shutdown();
-
                 }
             }
             else
@@ -563,21 +563,25 @@ int main (int argc, char** argv)
 
                 }
                 // FOR DEBUGGING
-                for(int i = 1; i <= detector.debugFileNo; i++)
+                QStringList filters;
+                filters << "*.jpeg";
+                QString path = QString::fromStdString(detector.debugFilePath);
+                QDir dir(path);
+                dir.setNameFilters(filters);
+                QStringList files = dir.entryList(filters,QDir::Files,QDir::Name);
+                uint fileCount = dir.count();
+
+                for(int i = 0; i <= fileCount; i++)
                 {
-
-                    // QString path("/home/hakan/fromJaguars/downloadedItems/jaguarY/2015-01-30-15:39:47/images/");
-                    QString path = QString::fromStdString(detector.debugFilePath);
-
-                    path.append("rgb_").append(QString::number(i)).append(".jpeg");
-
-                    Mat imm = imread(path.toStdString().data(),CV_LOAD_IMAGE_COLOR);
+                    QString filePath = path + files.at(i);
+                    Mat imm = imread(filePath.toStdString().data(),CV_LOAD_IMAGE_COLOR);
 
                     qint64 starttime = QDateTime::currentMSecsSinceEpoch();
 
-                    cv::Rect rect(0,0,imm.cols,imm.rows);
+                    //cv::Rect rect(0,0,imm.cols,imm.rows);
+                    // detector.currentImage = imm(rect);
 
-                    detector.currentImage = imm(rect);
+                    detector.currentImage = imm;
 
                     detector.processImage();
 
@@ -605,15 +609,20 @@ int main (int argc, char** argv)
 
                     detector.currentPlace->calculateMeanInvariant();
 
-                    qDebug()<<"Current place mean invariant: "<<detector.currentPlace->meanInvariant.rows<<detector.currentPlace->meanInvariant.cols<<detector.currentPlace->members.size();
+                    //qDebug()<<"Current place mean invariant: "<<detector.currentPlace->meanInvariant.rows<<detector.currentPlace->meanInvariant.cols<<detector.currentPlace->members.size();
 
                     if(detector.currentPlace->memberIds.rows >= detector.tau_p)
                     {
                         dbmanager.insertPlace(*detector.currentPlace);
 
                         detector.detectedPlaces.push_back(*detector.currentPlace);
-                        //int beginLast = *detector.currentPlace->memberIds.begin<int>();
-                        //strim << "Last place: \n " << beginLast;
+
+                        strim << "Place ID: " << detector.currentPlace->id << "\n";
+                        for(MatIterator_<int> it = (detector.currentPlace)->memberIds.begin<int>();
+                            it != (detector.currentPlace)->memberIds.end<int>();++it)
+                        {
+                            strim << *it << "\n";
+                        }
 
                         std_msgs::Int16 plID;
                         plID.data = detector.placeID;
@@ -671,24 +680,11 @@ void PlaceDetector::processImage()
 {
     if(!currentImage.empty())
     {
-        /*  int satLower =  30;
-
-        int satUpper =  230;
-
-        int valLower =  30;
-
-        int valUpper = 230;*/
-
-
         timer.stop();
-
-        //  Mat img;
-//        vector<Mat> channels;
-//        cv::cvtColor(currentImage,currentImage,CV_BGR2YCrCb);
-//        cv::split(currentImage,channels);
-//        equalizeHist(channels[0],channels[0]);
-//        cv::merge(channels,currentImage);
-//        cv::cvtColor(currentImage,currentImage,CV_YCrCb2BGR);
+        //qint64 start = QDateTime::currentMSecsSinceEpoch();
+        //Mat ii_image = ImageProcess::convertToIlluminationInvariant(currentImage,0.05);
+        //qint64 end = QDateTime::currentMSecsSinceEpoch();
+        //qDebug() <<"Illumination - Invariant Process Time:"<< (end-start) << "ms" << endl;
 
         Mat hueChannel= ImageProcess::generateChannelImage(currentImage,0,satLower,satUpper,valLower,valUpper);
 
@@ -707,7 +703,8 @@ void PlaceDetector::processImage()
         /*************************** Convert images to bubbles ***********************************************/
 
         //  vector<bubblePoint> satBubble = bubbleProcess::convertGrayImage2Bub(satChannel,focalLengthPixels,255);
-        vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel,focalLengthPixels,255);
+        //vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel,focalLengthPixels,255);
+        vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(currentImage,focalLengthPixels,255);
 
         /*****************************************************************************************************/
 
@@ -735,17 +732,16 @@ void PlaceDetector::processImage()
 
         //imwrite()
         currentBasePoint.status = 0;
-
+        qDebug() << "Current Mean: " <<statsVal.mean << "and" << statsVal.variance ;
         /*********************** WE CHECK FOR THE UNINFORMATIVENESS OF THE FRAME   *************************/
         if(statsVal.mean <= this->tau_val_mean || statsVal.variance <= this->tau_val_var)
         {
 
-            //qDebug()<< image_counter <<" is uninformative";
+            //qDebug() << "Mean: " << statsVal.mean << "Variance: "  << statsVal.variance ;
 
             currentBasePoint.status = 1;
 
             //  this->shouldProcess = true;
-
 
             // If we don't have an initialized window then initialize
             if(!this->tempwin)
@@ -762,11 +758,8 @@ void PlaceDetector::processImage()
             }
             else
             {
-
                 this->tempwin->endPoint = image_counter;
-
                 this->tempwin->totalDiff += 0.99;
-
                 this->tempwin->members.push_back(currentBasePoint);
             }
 
@@ -779,7 +772,7 @@ void PlaceDetector::processImage()
             image_counter++;
 
             detector.currentImage.release();
-
+            qDebug() << "Image " <<image_counter << "is uninformative";
             //  timer.start();
 
             detector.shouldProcess = true;
@@ -842,10 +835,11 @@ void PlaceDetector::processImage()
             //   qDebug()<<logTotal.rows<<logTotal.cols<<logTotal.at<float>(10,0);
             bool similar =false;
             // We don't have a previous base point
+            currentBasePoint.id = image_counter;
+            currentBasePoint.invariants = logTotal;
+
             if(previousBasePoint.id == 0)
             {
-                currentBasePoint.id = image_counter;
-                currentBasePoint.invariants = logTotal;
                 previousBasePoint = currentBasePoint;
                 currentPlace->members.push_back(currentBasePoint);
 
@@ -854,9 +848,6 @@ void PlaceDetector::processImage()
             }
             else
             {
-                currentBasePoint.id = image_counter;
-                currentBasePoint.invariants = logTotal;
-
                 //   double result = compareHistHK(currentBasePoint.invariants,previousBasePoint.invariants, CV_COMP_CHISQR);
 
                 // MY VERSION FOR CHISQR, SIMPLER!!
@@ -870,13 +861,13 @@ void PlaceDetector::processImage()
                     eucDist += diff;
                 }
                 eucDist = sqrt(eucDist);
-                qDebug()<<"Invariant diff between "<<currentBasePoint.id<<previousBasePoint.id<<"is "<<eucDist << " Euclidean";
+                //qDebug()<<"Invariant diff between "<<currentBasePoint.id<<previousBasePoint.id<<"is "<<eucDist << " Euclidean";
                 //qDebug()<<"Invariant diff between "<<currentBasePoint.id<<previousBasePoint.id<<"is "<<result << " Chi-Sq";
                 // JUST FOR DEBUGGING-> WRITES INVARIANT TO THE HOME FOLDER
                 //   writeInvariant(previousBasePoint.invariants,previousBasePoint.id);
 
                 ///////////////////////////// IF THE FRAMES ARE COHERENT ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
+                qDebug() << "Result of coherency function for the image:" << result;
                 if(result <= tau_inv && result > tau_inv2)
                 {
                     ///  dbmanager.insertBasePoint(currentBasePoint);
@@ -912,20 +903,10 @@ void PlaceDetector::processImage()
                                     std_msgs::Int16 plID;
                                     plID.data = this->placeID;
 
-                                    vector<BasePoint>::iterator beginIter =  currentPlace->members.begin();
-                                    vector<BasePoint>::iterator endIter =  currentPlace->members.end();
-
-                                    strim << "Place ID: " << currentPlace->id << "\n ------------------------------------ \n";
-                                    BasePoint bp;
-                                    for(vector<BasePoint>::iterator it = beginIter; it != endIter;++it)
+                                    strim << "Place ID: " << currentPlace->id << "\n";
+                                    for(MatIterator_<int> it = currentPlace->memberIds.begin<int>(); it != currentPlace->memberIds.end<int>();++it)
                                     {
-                                        bp = *it;
-                                        for(int i=0;i < 600;++i)
-                                        {
-                                            float invs = bp.invariants.at<float>(i,0);
-                                            strim << invs << " ";
-                                        }
-                                        strim << "\n";
+                                        strim << *it << "\n";
                                     }
 
                                     placedetectionPublisher.publish(plID);
@@ -1026,22 +1007,22 @@ void PlaceDetector::processImage()
                         }
                         else
                         {
-                            //qDebug() << "tempwin does not extend, we check if it is valid \n" ;
+                            qDebug() << "tempwin does not extend, we check if it is valid \n" ;
                             float avgdiff;
 
                             avgdiff = this->tempwin->totalDiff/(tempwin->endPoint - tempwin->startPoint+1);
-
+                            qDebug() << "Avg Diff here" << avgdiff;
                             // This is a valid temporal window
                             if(tempwin->endPoint - tempwin->startPoint >= tau_w && avgdiff >= tau_avgdiff)
                             {
-                                qDebug()<<"New Place";
+
                                 currentPlace->calculateMeanInvariant();
 
                                 //qDebug()<<"Current place mean invariant: "<<currentPlace->meanInvariant.rows<<currentPlace->meanInvariant.cols;
 
                                 if(currentPlace->memberIds.rows >= tau_p)
                                 {
-
+                                    qDebug()<<"New Place";
                                     dbmanager.insertPlace(*currentPlace);
 
                                     std_msgs::Int16 plID ;
@@ -1049,22 +1030,13 @@ void PlaceDetector::processImage()
 
                                     placedetectionPublisher.publish(plID);
 
-                                    vector<BasePoint>::iterator beginIter =  currentPlace->members.begin();
-                                    vector<BasePoint>::iterator endIter =  currentPlace->members.end();
-
                                     //qDebug() << "**********"<<currentPlace->id << "\t" <<beginMember << "-" << endMember << "\n";
 
-                                    strim << "Place ID: " << currentPlace->id << "\n ------------------------------------ \n";
-                                    BasePoint bp;
-                                    for(vector<BasePoint>::iterator it = beginIter; it != endIter;++it)
+                                    strim << "Place ID: " << currentPlace->id << "\n";
+
+                                    for(MatIterator_<int> it = currentPlace->memberIds.begin<int>(); it != currentPlace->memberIds.end<int>();++it)
                                     {
-                                        bp = *it;
-                                        for(int i=0;i < 600;++i)
-                                        {
-                                            float invs = bp.invariants.at<float>(i);
-                                            strim << invs << " ";
-                                        }
-                                        strim << "\n";
+                                        strim << *it << "\n";
                                     }
                                     this->detectedPlaces.push_back(*currentPlace);
 
@@ -1100,13 +1072,14 @@ void PlaceDetector::processImage()
                             // This is just a noisy temporal window. We should add the coherent basepoints to the current place
                             else
                             {
-                                //  basepointReservoir.push_back(currentBasePoint);
+                                qDebug() << "Noisy Temporal Window Here";
+                                basepointReservoir.push_back(currentBasePoint);
 
                                 delete tempwin;
                                 tempwin = 0;
 
                                 std::vector<BasePoint> AB;
-                                AB.reserve( currentPlace->members.size() + basepointReservoir.size() ); // preallocate memory
+                                AB.reserve( currentPlace->members.size() + basepointReservoir.size()); // preallocate memory
                                 AB.insert( AB.end(), currentPlace->members.begin(), currentPlace->members.end() );
                                 AB.insert( AB.end(), basepointReservoir.begin(), basepointReservoir.end() );
                                 currentPlace->members.clear();
@@ -1138,7 +1111,7 @@ void PlaceDetector::processImage()
             // DatabaseManager::insertInvariants(HUE_TYPE,frameNumber,invariants);
             //   qDebug()<<"Image Counter: "<<image_counter;
             if(!similar)
-            image_counter++;
+                image_counter++;
 
             //this->shouldProcess = true;
 
