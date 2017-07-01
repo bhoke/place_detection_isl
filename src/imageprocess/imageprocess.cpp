@@ -121,8 +121,6 @@ void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, 
 
 
     filters.push_back(filterOrg);
-
-
 }
 std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
 {
