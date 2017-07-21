@@ -101,8 +101,8 @@ vector<vector<int> > bubbleProcess::calculateImagePanAngles(int focalLengthPixel
             int panInt = (pan*180)/M_PI;
 
 
-            if(panInt < 0)panInt += 360;
-            else if(panInt > 359) panInt -=360;
+            if(panInt < 0)   panInt += 360;
+            else if(panInt > 359)   panInt -=360;
 
 
             result[i][j] = panInt;
@@ -115,13 +115,13 @@ vector<vector<int> > bubbleProcess::calculateImagePanAngles(int focalLengthPixel
 
         for(uint i = 0; i < imagePanAngles.size(); i++){
             imagePanAngles[i].clear();
-        }
 
-        imagePanAngles.clear();
+            imagePanAngles.clear();
 
       //  qDebug()<<imagePanAngles[0].size();
       //  qDebug()<<imagePanAngles.size();
 
+        }
 
     }
 
@@ -175,15 +175,11 @@ vector<vector<int> > bubbleProcess::calculateImageTiltAngles(int focalLengthPixe
 
       //  qDebug()<<imageTiltAngles[0].size();
        // qDebug()<<imageTiltAngles.size();
-
-
     }
 
     imageTiltAngles.resize(imageHeight,std::vector<int>(imageWidth));
 
     imageTiltAngles = result;
-
-
 
     return result;
 
@@ -216,6 +212,7 @@ vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage, int f
 
             float val = (float)grayImage.at<uchar>(i,j)/(float)maxval;
 
+
             if(val > 0)
             {
         //    qDebug()<<pan<<" "<<tilt;
@@ -241,9 +238,6 @@ vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage, int f
                 result.push_back(pt);
             }
         }
-
-
-
     }
 
     return result;

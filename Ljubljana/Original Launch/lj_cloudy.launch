@@ -21,9 +21,7 @@ type="place_detection_node" >
         <param name="val_upper" type="int" value="255" />
 <!-- DEBUG MODE SHOULD BE ALWAYS CHECKED -->
 	<param name="debug_mode" type="bool" value="true" />
-<!-- Number of image files that should be processed -->
-        <param name="file_number" type="int" value="2146" />
-        <param name="file_path" type="string" value="/home/hakan/Development/ISL/Datasets/cold_saarb/seq2_cloudy1/std_cam/" />
+        <param name="file_path" type="string" value="/home/berkanhoke/Datasets/Ljubljana/seq1_cloudy1/std_cam/" />
 
 	<param name="use_previous_memory" type="bool" value="false" />
         <param name="previous_memory_path" type="string" value="" />

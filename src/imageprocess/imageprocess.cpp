@@ -138,7 +138,6 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
         cv::medianBlur(copyImage,blurred,3);
 
         cv::filter2D(blurred,result,result.depth(),filters[i]);
-
         results.push_back(result);
 
     }
@@ -241,13 +240,9 @@ Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int s
                 if(satval > satLower && satval < satUpper)
                 {
                     //   if(hueval < 15 ) hueval = 180;
-
                     result.at<uchar>(i,j) = channels[channelNo].at<uchar>(i,j);
-
                 }
-
             }
-
         }
     }
 
