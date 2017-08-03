@@ -125,12 +125,12 @@ void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, 
 std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
 {
     std::vector<Mat> results;
-
+    singleChannelImage.convertTo(singleChannelImage,CV_32FC1);
     for(uint i = 0 ; i < filters.size(); i++)
     {
         Mat copyImage = singleChannelImage.clone();
 
-        Mat result = Mat::zeros(singleChannelImage.rows,singleChannelImage.cols,CV_8UC1);
+        Mat result = Mat::zeros(singleChannelImage.rows,singleChannelImage.cols,CV_32FC1);
 
         // cv::GaussianBlur(copyImage,copyImage,cv::Size(5,5),5,5);
         Mat blurred;

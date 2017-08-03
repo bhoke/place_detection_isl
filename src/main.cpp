@@ -16,7 +16,6 @@
 #include <QDateTime>
 #include <std_msgs/Bool.h>
 
-
 namespace enc = sensor_msgs::image_encodings;
 
 double compareHistHK(InputArray _H1, InputArray _H2, int method );
@@ -66,7 +65,6 @@ bool createDirectories(QString previousMemoryPath)
     imagesPath = mainDir.path();
 
     qDebug()<<"Image directory path"<<imagesPath;
-
 
     QString databasepath = QDir::homePath();
 
@@ -627,18 +625,18 @@ void PlaceDetector::processImage()
 
         cv::medianBlur(hueChannel, hueChannelFiltered,3);
 
-        vector<bubblePoint> hueBubble = bubbleProcess::convertGrayImage2Bub(hueChannelFiltered,focalLengthPixels,180);
+        vector<bubblePoint> hueBubble = bubbleProcess::convertGrayImage2Bub(hueChannelFiltered,180);
         vector<bubblePoint> reducedHueBubble = bubbleProcess::reduceBubble(hueBubble);
 
         /************************** Perform filtering and obtain resulting mat images ***********************/
         //  Mat satChannel= ImageProcess::generateChannelImage(img,1,satLower,satUpper,valLower,valUpper);
         Mat valChannel= ImageProcess::generateChannelImage(currentImage,2,satLower,satUpper,valLower,valUpper);
         /*****************************************************************************************************/
-        //std::cout << valChannel << "\n";
+        //if(image_counter == 1) std::cout << valChannel << "\n";
         /*************************** Convert images to bubbles ***********************************************/
 
         //  vector<bubblePoint> satBubble = bubbleProcess::convertGrayImage2Bub(satChannel,focalLengthPixels,255);
-        vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel,focalLengthPixels,255);
+        vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel,255);
         //vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(currentImage,focalLengthPixels,255);
         /*****************************************************************************************************/
 
@@ -650,7 +648,7 @@ void PlaceDetector::processImage()
         // Calculate statistics
         //  bubbleStatistics statsHue =  bubbleProcess::calculateBubbleStatistics(reducedHueBubble,180);
         // bubbleStatistics statsSat =  bubbleProcess::calculateBubbleStatistics(reducedSatBubble,255);
-        bubbleStatistics statsVal =  bubbleProcess::calculateBubbleStatistics(reducedValBubble,255);
+        bubbleStatistics statsVal = bubbleProcess::calculateBubbleStatistics(reducedValBubble,255);
 
         //qDebug()<<"Bubble statistics: "<<statsVal.mean<<statsVal.variance;
 
@@ -714,7 +712,6 @@ void PlaceDetector::processImage()
         else
         {
             Mat totalInvariants;
-            //qint64 start =  QDateTime::currentMSecsSinceEpoch();
 
             DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedHueBubble,noHarmonics,noHarmonics);
             Mat hueInvariants = bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics, noHarmonics);
@@ -722,21 +719,21 @@ void PlaceDetector::processImage()
             totalInvariants = hueInvariants.clone();
             cv::Mat logTotal;
 
-            // qDebug()<<hueInvariants.rows<<hueInvariants.cols<<hueInvariants.at<float>(0,10);
-
             Mat grayImage;
             cv::cvtColor(currentImage,grayImage,CV_BGR2GRAY);
             std::vector<Mat> sonuc = ImageProcess::applyFilters(grayImage);
-            //qDebug() << sonuc.size();
-            for(uint j = 0; j < sonuc.size(); j++)
+
+            for(size_t j = 0; j < sonuc.size(); j++)
             {
-                vector<bubblePoint> imgBubble = bubbleProcess::convertGrayImage2Bub(sonuc[j],focalLengthPixels,255);
+                //if(image_counter == 1)
+                    //std::cout << "Response of filter" << j << ":" << std::endl << sonuc[j] << std::endl;
+                vector<bubblePoint> imgBubble = bubbleProcess::convertGrayImage2Bub(sonuc[j],255);
 
                 vector<bubblePoint> resred = bubbleProcess::reduceBubble(imgBubble);
 
-                DFCoefficients dfcoeff =  bubbleProcess::calculateDFCoefficients(resred,noHarmonics,noHarmonics);
+                DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(resred,noHarmonics,noHarmonics);
 
-                Mat invariants =  bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics,noHarmonics);
+                Mat invariants = bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics,noHarmonics);
                 if(j==-1) // Set this to negative value to use hue channel, set 0 otherwise
                     totalInvariants = invariants.clone();
                 else
@@ -748,17 +745,17 @@ void PlaceDetector::processImage()
             //            cv::transpose(logTotal,logTotal);
 
             cv::transpose(totalInvariants/1e8,logTotal);
-            std::cout << logTotal;
+            //std::cout << logTotal;
             //qint64 stop = QDateTime::currentMSecsSinceEpoch();
 
             //qDebug()<<"Bubble time"<<(stop-start);
             // TOTAL INVARIANTS N X 1 vector
             //logTotal = logTotal / 1e8;
-            for(int kk = 0; kk < logTotal.rows; kk++)
-            {
-                if(logTotal.at<float>(kk,0) < 0)
-                    logTotal.at<float>(kk,0) = 0.5;
-            }
+//            for(int kk = 0; kk < logTotal.rows; kk++)
+//            {
+//                if(logTotal.at<float>(kk,0) < 0)
+//                    logTotal.at<float>(kk,0) = 0.5;
+//            }
 
             bool similar =false;
             // We don't have a previous base point
