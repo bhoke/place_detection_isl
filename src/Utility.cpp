@@ -50,7 +50,6 @@ LearnedPlace::LearnedPlace()
     id = -1;
 
 }
-
 LearnedPlace::LearnedPlace(int id)
 {
     this->id = id;

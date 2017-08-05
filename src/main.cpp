@@ -18,7 +18,7 @@
 
 namespace enc = sensor_msgs::image_encodings;
 
-double compareHistHK(InputArray _H1, InputArray _H2, int method );
+double compareHistHK(InputArray _H1, InputArray _H2 );
 
 double compareHKCHISQR(cv::Mat input1, cv::Mat input2);
 
@@ -165,12 +165,6 @@ bool saveParameters(QString filepath)
     return true;
 }
 
-void timerCallback(const ros::TimerEvent& event)
-{
-    detector.shouldProcess = false;
-    detector.processImage();
-}
-
 void imageCallback(const sensor_msgs::ImageConstPtr& original_image)
 {
 
@@ -181,11 +175,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& original_image)
         detector.currentImage = imm(rect);//cv_bridge::toCvCopy(original_image, enc::BGR8)->image;
         // detector.shouldProcess = false;
     }
-
-    //cv::imshow("win",image);
-
-    //Add some delay in miliseconds. The function only works if there is at least one HighGUI window created and the window is active. If there are several HighGUI windows, any of them can be active.
-    //cv::waitKey(3);
 }
 void startStopCallback(const std_msgs::Int16 startstopSignal)
 {
@@ -281,7 +270,6 @@ double compareHKCHISQR(Mat input1, Mat input2)
     return summ;
 }
 
-// For DEBUGGING: Writing invariants to a file
 void writeInvariant(cv::Mat inv, int count)
 {
     QString pathh = QDir::homePath();
@@ -309,30 +297,13 @@ int main (int argc, char** argv)
     image_transport::ImageTransport it(nh);
     image_transport::TransportHints hints("compressed");
 
-    // detector.tau_w = 1;
-    // detector.tau_n = 1;
-    // detector.tau_p = 20;
-    // detector.tau_avgdiff = 0.45;
-    // std::string camera_topic = "";
     int img_width;
     int img_height;
     std::string camera_topic;
-    // detector.focalLengthPixels = 525;
-
-    // detector.satLower = 30;
-    // detector.satUpper = 230;
-    // detector.valLower = 30;
-    // detector.valUpper = 230;
-
     detector.noHarmonics = 10;
     detector.image_counter = 1;
 
     detector.shouldProcess = false;
-    // detector.debugMode = false;
-    // detector.usePreviousMemory = false;
-
-    std_msgs::String filterPath;
-
 
     pnh.getParam("tau_w",detector.tau_w);
     pnh.getParam("tau_n",detector.tau_n);
@@ -353,23 +324,14 @@ int main (int argc, char** argv)
     /***** GET THE DEBUG MODE ****************/
 
     pnh.getParam("debug_mode",detector.debugMode);
-
-    /*************GET DEBUG FILE PATH ************************/
-    std_msgs::String file_path;
-
     pnh.getParam("file_path", detector.debugFilePath);
 
-    //detector.debugFilePath = file_path.data;
-
-    /***********************************************************/
     qDebug()<<"Saturation and Value thresholds"<<detector.satLower<<detector.satUpper<<detector.valLower<<detector.valUpper<<detector.tau_avgdiff;
 
     if(detector.debugMode)
     {
         qDebug()<<"Debug mode is on!! File Path"<<QString::fromStdString(detector.debugFilePath);
     }
-
-    /****** GET THE USE PREVIOUS MEMORY PARAM ****/
 
     pnh.getParam("use_previous_memory",detector.usePreviousMemory);
 
@@ -492,23 +454,8 @@ int main (int argc, char** argv)
                     ros::shutdown();
                 }
             }
-            else
+            else // Debug Mode
             {
-                QString processingPerImageFilePath = mainDirectoryPath;
-
-                processingPerImageFilePath = processingPerImageFilePath.append("/pperImage.txt");
-
-                QFile file(processingPerImageFilePath);
-
-                QTextStream strm;
-
-                if(file.open(QFile::WriteOnly))
-                {
-                    qDebug()<<"Processing per Image file Path has been opened";
-                    strm.setDevice(&file);
-
-                }
-                // FOR DEBUGGING
                 QStringList filters;
                 filters << "*.jpeg";
                 QString path = QString::fromStdString(detector.debugFilePath);
@@ -521,7 +468,6 @@ int main (int argc, char** argv)
                 {
                     QString filePath = path + files.at(i);
                     Mat imm = imread(filePath.toStdString().data(),CV_LOAD_IMAGE_COLOR);
-                    qint64 starttime = QDateTime::currentMSecsSinceEpoch();
 
                     //cv::Rect rect(0,0,imm.cols,imm.rows);
                     // detector.currentImage = imm(rect);
@@ -529,23 +475,13 @@ int main (int argc, char** argv)
                     detector.currentImage = imm;
 
                     detector.processImage();
-
-                    qint64 stoptime = QDateTime::currentMSecsSinceEpoch();
-
-                    //qDebug()<<(float)(stoptime-starttime);
-
-                    if(strm.device() != NULL)
-                        strm<<(float)(stoptime-starttime)<<"\n";
-
                     ros::spinOnce();
 
                     loop.sleep();
 
                     if(!ros::ok())
                         break;
-                    // qDebug()<<i;
                 }
-
 
                 if(detector.currentPlace && detector.currentPlace->id > 0 && detector.currentPlace->members.size() > 0)
                 {
@@ -583,12 +519,8 @@ int main (int argc, char** argv)
                     detector.shouldProcess = false;
                     ros::shutdown();
                 } // end if detector.currentPlace
-
-                file.close();
-
-            } // end else
+            } // end Debug Mode
         } // end if detector.should Process
-        //  qDebug()<<"New Place";
     } //  while(ros::ok())
 
     rawInvariants.close();
@@ -628,29 +560,11 @@ void PlaceDetector::processImage()
         vector<bubblePoint> hueBubble = bubbleProcess::convertGrayImage2Bub(hueChannelFiltered,180);
         vector<bubblePoint> reducedHueBubble = bubbleProcess::reduceBubble(hueBubble);
 
-        /************************** Perform filtering and obtain resulting mat images ***********************/
-        //  Mat satChannel= ImageProcess::generateChannelImage(img,1,satLower,satUpper,valLower,valUpper);
         Mat valChannel= ImageProcess::generateChannelImage(currentImage,2,satLower,satUpper,valLower,valUpper);
-        /*****************************************************************************************************/
-        //if(image_counter == 1) std::cout << valChannel << "\n";
-        /*************************** Convert images to bubbles ***********************************************/
-
-        //  vector<bubblePoint> satBubble = bubbleProcess::convertGrayImage2Bub(satChannel,focalLengthPixels,255);
         vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel,255);
-        //vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(currentImage,focalLengthPixels,255);
-        /*****************************************************************************************************/
-
-        /***************** Reduce the bubbles ********************************************************/
-        //   vector<bubblePoint> reducedSatBubble = bubbleProcess::reduceBubble(satBubble);
         vector<bubblePoint> reducedValBubble = bubbleProcess::reduceBubble(valBubble);
 
-
-        // Calculate statistics
-        //  bubbleStatistics statsHue =  bubbleProcess::calculateBubbleStatistics(reducedHueBubble,180);
-        // bubbleStatistics statsSat =  bubbleProcess::calculateBubbleStatistics(reducedSatBubble,255);
         bubbleStatistics statsVal = bubbleProcess::calculateBubbleStatistics(reducedValBubble,255);
-
-        //qDebug()<<"Bubble statistics: "<<statsVal.mean<<statsVal.variance;
 
         currentBasePoint.avgVal = statsVal.mean;
         currentBasePoint.varVal = statsVal.variance;
@@ -732,6 +646,7 @@ void PlaceDetector::processImage()
                 vector<bubblePoint> resred = bubbleProcess::reduceBubble(imgBubble);
 
                 DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(resred,noHarmonics,noHarmonics);
+
 
                 Mat invariants = bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics,noHarmonics);
                 if(j==-1) // Set this to negative value to use hue channel, set 0 otherwise
@@ -1015,19 +930,11 @@ void PlaceDetector::processImage()
             //this->shouldProcess = true;
 
         } //IF INFORMATIVE
-
-
-
     } //IF CURRENT IMAGE != EMPTY
-
     this->currentImage.release();
 
     this->shouldProcess = true;
-
     //  timer.start();
-
-
-
 } //end of processImage
 
 PlaceDetector::PlaceDetector()
@@ -1051,7 +958,7 @@ bool TemporalWindow::checkExtensionStatus(uint currentID)
     return false;
 }
 
-double compareHistHK( InputArray _H1, InputArray _H2, int method )
+double compareHistHK( InputArray _H1, InputArray _H2)
 {
     Mat H1 = _H1.getMat(), H2 = _H2.getMat();
     const Mat* arrays[] = {&H1, &H2, 0};

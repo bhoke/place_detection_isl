@@ -8,41 +8,18 @@
 #include <QRgb>
 #include <opencv2/opencv.hpp>
 
-class point{
-public:
-    long r;
-    double theta; // laser beam angle in radians
-    double phi; // tilt angle (pantilt System)
-    double rho; //pan angle (pantilt System)
-    double x;
-    double y;
-    double z;
-
-    QRgb color;
-    double red;
-    double green;
-    double blue;
-
-    int px; // x pixel value of the point
-    int py; // y pixel value of the point
-};
-
 struct bubblePoint{
 
     int panAng;
     int tiltAng;
     double val;
-
-
 };
 struct bubbleStatistics
 {
     // mean of the bubble Surface
     double mean;
-
     // variance of the bubble Surface
     double variance;
-
     // maximum value of the bubbble point
     double maxDist;
 
@@ -54,16 +31,16 @@ struct DFCoefficients
     std::vector< std::vector<float> > b;
     std::vector< std::vector<float> > c;
     std::vector< std::vector<float> > d;
-
 };
 
 using std::vector;
 
-class bubbleProcess
+class bubbleProcess : public QObject
 {
+    Q_OBJECT
 public:
     
-	bubbleProcess();
+    bubbleProcess();
 
     static DFCoefficients calculateDFCoefficients(const std::vector <bubblePoint>& bubble, int harmonic1, int harmonic2);
 
@@ -74,14 +51,11 @@ public:
     // Round double to int
     static double round(double num);
 
-	// Reduces the number of points in a bubble by combining points falling in the same patch
-	static vector<bubblePoint> reduceBubble(vector<bubblePoint>bubble);  
-	
-	// Saves the bubble
-	static void saveBubble(QFile* file, vector<bubblePoint> bubble); 
+    // Reduces the number of points in a bubble by combining points falling in the same patch
+    static vector<bubblePoint> reduceBubble(vector<bubblePoint>bubble);
 
     // Reads the bubble
-	static vector<bubblePoint> readBubble(QFile* file); 
+    static vector<bubblePoint> readBubble(QFile* file);
 
     static vector<bubblePoint> convertGrayImage2Bub(cv::Mat grayImage, float maxval);
 

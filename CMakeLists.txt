@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 #include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-#set(CMAKE_BUILD_TYPE Debug)
+
 project(place_detection_isl)
 
 find_package(catkin REQUIRED COMPONENTS

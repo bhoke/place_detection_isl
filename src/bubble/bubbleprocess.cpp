@@ -111,22 +111,13 @@ vector<vector<int> > bubbleProcess::calculateImagePanAngles(int focalLengthPixel
 
             //  qDebug()<<imagePanAngles[0].size();
             //  qDebug()<<imagePanAngles.size();
-
         }
-
     }
 
     imagePanAngles.resize(imageHeight,std::vector<int> (imageWidth));
 
     imagePanAngles = result;
-
-
-    // qDebug()<<"Image pan angles row size: "<<imagePanAngles[0].size();
-
-    // qDebug()<<"Image pan angles total size: "<<imagePanAngles.size();
-
     return result;
-
 }
 vector<vector<int> > bubbleProcess::calculateImageTiltAngles(int focalLengthPixels, int imageWidth, int imageHeight)
 {
@@ -149,9 +140,6 @@ vector<vector<int> > bubbleProcess::calculateImageTiltAngles(int focalLengthPixe
             else if(tiltInt > 359) tiltInt -=360;
 
             result[i][j] = tiltInt;
-
-            //result.at(i).at(j).pushback()
-
         }
 
     }
@@ -171,35 +159,16 @@ vector<vector<int> > bubbleProcess::calculateImageTiltAngles(int focalLengthPixe
     imageTiltAngles.resize(imageHeight,std::vector<int>(imageWidth));
 
     imageTiltAngles = result;
-
     return result;
-
 }
 vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage, float maxval)
 {
-
     vector<bubblePoint> result;
-
-    // if(imagePanAngles[12][12] == 0) calculateImagePanAngles(focalLengthPixels,grayImage.cols,grayImage.rows);
-
-    // if(imageTiltAngles.size() == 0) calculateImageTiltAngles(focalLengthPixels,grayImage.cols,grayImage.rows);
-
-
-    //int centerx = grayImage.cols/2;
-
-    //int centery = grayImage.rows/2;
 
     for(int i = 0; i < grayImage.rows; i++)
     {
         for(int j = 0; j < grayImage.cols; j++)
         {
-            /*    int deltax = centerx - j;
-
-            int deltay = centery - i;
-
-            float pan = atan2((double)deltax,(double)focalLengthPixels);
-
-            float tilt = atan2((double)deltay,(double)focalLengthPixels);*/
             grayImage.convertTo(grayImage,CV_32FC1);
             float val = grayImage.at<float>(i,j)/maxval;
             //qDebug() << "Val convert: " << val<< " = " << grayImage.at<float>(i,j) << " / " << maxval;
@@ -229,7 +198,6 @@ vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage, float
             //            }
         }
     }
-
     return result;
 }
 
@@ -347,26 +315,9 @@ vector<bubblePoint> bubbleProcess::reduceBubble(std::vector<bubblePoint> bubble)
                     pt.val = vals[i][j]/counts[i][j];
                     //qDebug("Vals: %f -- Counts: %f" , vals[i][j] , counts[i][j]);
                 }
-
                 result.push_back(pt);
-                // counts[i][j] = 0;
             }
         }
     }
-
-
     return result;
-
-}
-
-void bubbleProcess::saveBubble(QFile *file, std::vector<bubblePoint> bubble){
-
-    QTextStream stream(file);
-
-    for(ulong i = 0; i < bubble.size(); i++){
-
-        // if val is in normal ranges save it
-        if(bubble[i].val < 1 && bubble[i].val > 0)
-            stream<<(int)bubble[i].panAng<<" "<<(int)bubble[i].tiltAng<<" "<<(double)bubble[i].val<<"\n";
-    }
 }

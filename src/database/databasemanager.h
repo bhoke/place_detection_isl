@@ -9,9 +9,6 @@
 #include <QFile>
 #include <QDir>
 
-//#define DB_PATH "/home/hakan/Development/ISL/Datasets/ImageClef2012/training3v2.db"
-//#define INVARIANTS_DB_PATH "/home/hakan/Development/ISL/Datasets/ImageClef2012/invariants.db"
-
 #define LASER_TYPE 55
 #define HUE_TYPE 56
 #define SAT_TYPE 57

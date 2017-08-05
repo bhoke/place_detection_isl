@@ -128,65 +128,30 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
     return results;
 
 }
-Mat ImageProcess::applyFilter(Mat singleChannelImage)
-{
-    Mat result = Mat::zeros(singleChannelImage.rows,singleChannelImage.cols,CV_8UC1);
 
-    cv::GaussianBlur(singleChannelImage,singleChannelImage,cv::Size(5,5),5,5);
-
-    cv::filter2D(singleChannelImage,result,result.depth(),filterOrg);
-
-    //  cv::threshold(result,result,250,255,CV_THRESH_BINARY);
-
-    /*    namedWindow("filterResult");
-
-       namedWindow("orgImage");
-
-       imshow("filterResult",result);
-
-       imshow("orgImage",singleChannelImage);
-
-      waitKey();
-
-      destroyAllWindows();*/
-
-    return result;
-
-
-}
 Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int satLower, int satUpper, int valLower, int valUpper)
 {
-    Mat hsvimage;
-    cv::cvtColor(rgbimage,hsvimage,CV_BGR2HSV);
+    Mat hsvImage;
+    cv::cvtColor(rgbimage,hsvImage,CV_BGR2HSV);
 
     // channel_0 hue channel_1 saturation channel_2 value
     std::vector<Mat> channels;
 
     Mat result;
-
     result = Mat::zeros(rgbimage.rows,rgbimage.cols,CV_8UC1);
 
-    cv::split(hsvimage,channels);
-    // Mat mask;
-
-    // cv::inRange(hsvimage,Scalar(0,satLower,valLower),Scalar(180,satUpper,valUpper),mask);
+    cv::split(hsvImage,channels);
 
     for(int i = 0; i < rgbimage.rows; i++)
     {
 
         for(int j = 0; j < rgbimage.cols; j++)
         {
-
-            //uchar hueval = channels[0].at<uchar>(i,j);
-
             uchar satval = channels[1].at<uchar>(i,j);
-
             uchar valval = channels[2].at<uchar>(i,j);
-
 
             if(valval > valLower && valval < valUpper)
             {
-
                 if(satval > satLower && satval < satUpper)
                 {
                     //   if(hueval < 15 ) hueval = 180;
@@ -195,9 +160,9 @@ Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int s
             }
         }
     }
-
     return result;
 }
+
 Mat ImageProcess::convertToIlluminationInvariant(const Mat &image,float lambda)
 {
     Mat intensity,f;
