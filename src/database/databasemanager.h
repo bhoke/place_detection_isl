@@ -29,7 +29,7 @@ class DatabaseManager : public QObject
     Q_OBJECT
 public:
     explicit DatabaseManager(QObject *parent = 0);
-  //  ~DatabaseManager();
+    //  ~DatabaseManager();
 
     bool openDB(QString filePath);
 
@@ -40,22 +40,11 @@ public:
 
     bool deleteDB();
 
-   bool isOpen();
-
-    // Type = 55:Lazer, 56:Hue, XX:Filter_Number, Number: the current bubble number-> obtained from frame number
-    bool insertRowtoBubble(int type, int number, bubblePoint row);
-
-    bool insertRowtoBubble(int type, int number, int pan, int tilt, double val);
-
-    bool insertBubble(int type,int number, std::vector<bubblePoint> bubble);
+    bool isOpen();
 
     bool insertInvariants(int type,int number, std::vector< std::vector<float> > invariants);
 
-    bool insertBubbleStatistics(int type, int number, bubbleStatistics stats);
-
     std::vector<bubblePoint> readBubble(int type, int number);
-
-    void determinePlaceLabels(QString filePath);
 
     bool insertTemporalWindow(const TemporalWindow& twindow);
 
@@ -75,7 +64,7 @@ public:
 
     bool insertBDSTLevel(int id, const Level& aLevel);
 
-  //  TopologicalMap getTopologicalMap(int id);
+    //  TopologicalMap getTopologicalMap(int id);
 
     cv::Mat getPlaceMeanInvariant(int id);
 
@@ -87,10 +76,10 @@ public:
 
     cv::Mat byteArray2Mat(const QByteArray & byteArray);
 
-   QSqlError lastError();
+    QSqlError lastError();
 
 private:
-  QSqlDatabase db;
+    QSqlDatabase db;
 
     
 signals:

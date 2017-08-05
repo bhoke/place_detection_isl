@@ -957,19 +957,6 @@ void PlaceDetector::processImage()
                                     this->placeID++;
                                 }
                                 delete currentPlace;
-                                currentPlace = 0;
-                                // this->placeID++;
-
-                                //  cv::Mat result = DatabaseManager::getPlaceMeanInvariant(this->placeID-1);
-
-                                //  qDebug()<<"Previous place mean invariant: "<<result.rows<<result.cols<<result.at<float>(50,0);
-
-                                //  result = DatabaseManager::getPlaceMemberIds(this->placeID-1);
-
-                                /*    for(int k = 0; k< result.rows; k++){
-
-                                    qDebug()<<"Previous place members: "<<result.rows<<result.cols<<result.at<unsigned short>(k,0);
-                                }*/
 
                                 currentPlace = new Place(this->placeID);
 
@@ -1022,8 +1009,6 @@ void PlaceDetector::processImage()
                 //////////////////////////////////////////////////////////////////////////////////////////////////
             } //IF PREVIOUS POINT ID != 0
 
-            // DatabaseManager::insertInvariants(HUE_TYPE,frameNumber,invariants);
-            //   qDebug()<<"Image Counter: "<<image_counter;
             if(!similar)
                 image_counter++;
 
