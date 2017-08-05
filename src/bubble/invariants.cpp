@@ -15,7 +15,7 @@ using namespace std;
 cv::Mat bubbleProcess::calculateInvariantsMat(DFCoefficients coeff, int harmonic1, int harmonic2)
 {
 
-    cv::Mat result(1,harmonic1*harmonic2,CV_32FC1);
+    cv::Mat result(harmonic1*harmonic2,1,CV_32FC1);
 
     for (int m=0;m<harmonic1;m++)
 
@@ -27,7 +27,7 @@ cv::Mat bubbleProcess::calculateInvariantsMat(DFCoefficients coeff, int harmonic
             else
                 val =coeff.a[m][n]*coeff.a[m][n]+coeff.b[m][n]*coeff.b[m][n]+coeff.c[m][n]*coeff.c[m][n]+coeff.d[m][n]*coeff.d[m][n];
 
-            result.at<float>(0,10*m+n) = val;
+            result.at<float>(10*m+n,0) = val;
         }
 
     return result;

@@ -11,6 +11,7 @@ Place::Place(int id)
     this->memberIds = cv::Mat::zeros(1,1,CV_16UC1);
 
 }
+
 void Place::calculateMeanInvariant()
 {
     Mat wholeInvariants;
@@ -50,12 +51,14 @@ LearnedPlace::LearnedPlace()
     id = -1;
 
 }
+
 LearnedPlace::LearnedPlace(int id)
 {
     this->id = id;
     this->memberIds = cv::Mat::zeros(1,1,CV_16UC1);
 
 }
+
 void LearnedPlace::calculateMeanInvariant()
 {
    // this->memberInvariants = wholeInvariants.clone();
@@ -74,5 +77,3 @@ TemporalWindow::TemporalWindow()
     id = -1;
     totalDiff = 0.0;
 }
-
-

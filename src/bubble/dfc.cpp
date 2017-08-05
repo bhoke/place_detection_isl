@@ -22,11 +22,8 @@ DFCoefficients bubbleProcess::calculateDFCoefficients(const std::vector<bubblePo
     dfcoeff.c.resize(harmonic1, std::vector<float>(harmonic2, 0));
     dfcoeff.d.resize(harmonic1, std::vector<float>(harmonic2, 0));
 
-    float f1,f2;
-    float angle=5.5, rho;
-    f1=angle*harmonic1/360;
+    float f1,f2,rho;
     float angles[2];
-    //int angleIndex[2];
 
     for(uint i = 0; i < bubble.size(); i++)
     {
@@ -46,13 +43,11 @@ DFCoefficients bubbleProcess::calculateDFCoefficients(const std::vector<bubblePo
             if (angles[1]>360)
                 angles[1]=angles[1]-360;
         }
-//        angleIndex[0]=int(angles[0]);
-//        angleIndex[1]=int(angles[1]);
 
         for (int m=0;m<harmonic1;m++)
             for (int n=0;n<harmonic2;n++) {
-                f1= angles[0];//float(angleIndex[0]);
-                f2= angles[1];//float(angleIndex[1]);
+                f1= angles[0];
+                f2= angles[1];
                 dfcoeff.a[m][n] += rho*cos(m*f1*PI/180)*cos(n*f2*PI/180)*4;
                 dfcoeff.b[m][n] += rho*sin(m*f1*PI/180)*cos(n*f2*PI/180)*4;
                 dfcoeff.c[m][n] += rho*cos(m*f1*PI/180)*sin(n*f2*PI/180)*4;

@@ -524,22 +524,21 @@ int main (int argc, char** argv)
     } //  while(ros::ok())
 
     rawInvariants.close();
-    /// Delete the current place
+    // Delete the current place
     if(detector.currentPlace)
     {
         delete detector.currentPlace;
         detector.currentPlace = 0;
     }
 
-    /// Insert basepoints to the database
+    // Insert basepoints to the database
     if(detector.wholebasepoints.size()>0)
         dbmanager.insertBasePoints(detector.wholebasepoints);
-
 
     dbmanager.closeDB();
 
     return 0;
-}
+} // End of main()
 
 void PlaceDetector::processImage()
 {
@@ -580,12 +579,7 @@ void PlaceDetector::processImage()
         /*********************** WE CHECK FOR THE UNINFORMATIVENESS OF THE FRAME   *************************/
         if(statsVal.mean <= this->tau_val_mean || statsVal.variance <= this->tau_val_var)
         {
-
-            //qDebug() << "Mean: " << statsVal.mean << "Variance: "  << statsVal.variance ;
-
             currentBasePoint.status = 1;
-
-            //  this->shouldProcess = true;
 
             // If we don't have an initialized window then initialize
             if(!this->tempwin)
@@ -631,7 +625,6 @@ void PlaceDetector::processImage()
             Mat hueInvariants = bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics, noHarmonics);
 
             totalInvariants = hueInvariants.clone();
-            cv::Mat logTotal;
 
             Mat grayImage;
             cv::cvtColor(currentImage,grayImage,CV_BGR2GRAY);
@@ -639,14 +632,11 @@ void PlaceDetector::processImage()
 
             for(size_t j = 0; j < sonuc.size(); j++)
             {
-                //if(image_counter == 1)
-                    //std::cout << "Response of filter" << j << ":" << std::endl << sonuc[j] << std::endl;
                 vector<bubblePoint> imgBubble = bubbleProcess::convertGrayImage2Bub(sonuc[j],255);
 
                 vector<bubblePoint> resred = bubbleProcess::reduceBubble(imgBubble);
 
                 DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(resred,noHarmonics,noHarmonics);
-
 
                 Mat invariants = bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics,noHarmonics);
                 if(j==-1) // Set this to negative value to use hue channel, set 0 otherwise
@@ -655,43 +645,21 @@ void PlaceDetector::processImage()
                     cv::hconcat(totalInvariants, invariants, totalInvariants);
             }
 
-            //            cv::log(totalInvariants,logTotal);
-            //            logTotal = logTotal/25;
-            //            cv::transpose(logTotal,logTotal);
-
-            cv::transpose(totalInvariants/1e8,logTotal);
-            //std::cout << logTotal;
-            //qint64 stop = QDateTime::currentMSecsSinceEpoch();
-
-            //qDebug()<<"Bubble time"<<(stop-start);
-            // TOTAL INVARIANTS N X 1 vector
-            //logTotal = logTotal / 1e8;
-//            for(int kk = 0; kk < logTotal.rows; kk++)
-//            {
-//                if(logTotal.at<float>(kk,0) < 0)
-//                    logTotal.at<float>(kk,0) = 0.5;
-//            }
-
             bool similar =false;
             // We don't have a previous base point
             currentBasePoint.id = image_counter;
-            //currentBasePoint.invariants = totalInvariants;
-            currentBasePoint.invariants = logTotal;
+
+            currentBasePoint.invariants = totalInvariants/1e8;
 
             if(previousBasePoint.id == 0)
             {
                 previousBasePoint = currentBasePoint;
                 currentPlace->members.push_back(currentBasePoint);
-
-                /// dbmanager.insertBasePoint(currentBasePoint);
                 wholebasepoints.push_back(currentBasePoint);
             }
             else
             {
                 double result = compareHKCHISQR(currentBasePoint.invariants,previousBasePoint.invariants);
-
-                // JUST FOR DEBUGGING-> WRITES INVARIANT TO THE HOME FOLDER
-                //   writeInvariant(previousBasePoint.invariants,previousBasePoint.id);
 
                 ///////////////////////////// IF THE FRAMES ARE COHERENT ///////////////////////////////////////////////////////////////////////////////////////////////////////
                 qDebug() << "Result of coherency function for the " << previousBasePoint.id
@@ -798,10 +766,7 @@ void PlaceDetector::processImage()
                 ///////////////////////// IF THE FRAMES ARE INCOHERENT /////////////////////////////////////
                 else
                 {
-                    //qDebug() << previousBasePoint.id<< " and " << currentBasePoint.id << "are incoherent \n";
                     currentBasePoint.status = 2;
-
-                    ///    dbmanager.insertBasePoint(currentBasePoint);
                     wholebasepoints.push_back(currentBasePoint);
 
                     // If we don't have a temporal window create one
@@ -926,9 +891,7 @@ void PlaceDetector::processImage()
 
             if(!similar)
                 image_counter++;
-
             //this->shouldProcess = true;
-
         } //IF INFORMATIVE
     } //IF CURRENT IMAGE != EMPTY
     this->currentImage.release();

@@ -72,8 +72,6 @@ public:
     std::vector<BasePoint> cohMembers;
     // Holds the value of total incoherency inside the temporal window
     float totalDiff;
-
-
 };
 
 
