@@ -13,6 +13,8 @@ public:
 
     static Mat convertToIlluminationInvariant(const Mat& image, float lambda);
 
+    static void scaleResponse(cv::Mat &response, std::pair<float,float> minMax, float newMin, float newMax);
+
     static void readFilter(QString fileName, int filterSize, bool transpose, bool save, bool show);
 
     static std::vector<Mat> applyFilters(Mat singleChannelImage);

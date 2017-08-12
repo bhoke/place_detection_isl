@@ -109,24 +109,30 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
 {
     std::vector<Mat> results;
     singleChannelImage.convertTo(singleChannelImage,CV_32FC1);
+    std::pair<float,float> minMax[5] = {std::make_pair(-60506.34, 83692.17),
+                                                 std::make_pair(-60761.93, 60761.93),
+                                                 std::make_pair(-71329.80, 63222.63),
+                                                 std::make_pair(-68296.54, 68296.54),
+                                                 std::make_pair(-68296.54, 68296.54)};
     for(uint i = 0 ; i < filters.size(); i++)
     {
         Mat copyImage = singleChannelImage.clone();
 
         Mat result = Mat::zeros(singleChannelImage.rows,singleChannelImage.cols,CV_32FC1);
-
-        // cv::GaussianBlur(copyImage,copyImage,cv::Size(5,5),5,5);
         Mat blurred;
 
         cv::medianBlur(copyImage,blurred,3);
 
         cv::filter2D(blurred,result,result.depth(),filters[i]);
+        scaleResponse(result,minMax[i],-500,1000);
         results.push_back(result);
-
     }
-
+    std::cout << cv::norm(results[1],results[0]) << std::endl;
     return results;
+}
 
+void ImageProcess::scaleResponse(cv::Mat &response, std::pair<float,float> minMax, float newMin, float newMax){
+    response = (response - minMax.first) * (newMax - newMin) / (minMax.second - minMax.first) + newMin;
 }
 
 Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int satLower, int satUpper, int valLower, int valUpper)

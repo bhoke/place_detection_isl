@@ -630,6 +630,7 @@ void PlaceDetector::processImage()
             cv::cvtColor(currentImage,grayImage,CV_BGR2GRAY);
             std::vector<Mat> sonuc = ImageProcess::applyFilters(grayImage);
 
+
             for(size_t j = 0; j < sonuc.size(); j++)
             {
                 vector<bubblePoint> imgBubble = bubbleProcess::convertGrayImage2Bub(sonuc[j],255);
@@ -649,7 +650,7 @@ void PlaceDetector::processImage()
             // We don't have a previous base point
             currentBasePoint.id = image_counter;
 
-            currentBasePoint.invariants = totalInvariants/1e8;
+            currentBasePoint.invariants = totalInvariants;
 
             if(previousBasePoint.id == 0)
             {

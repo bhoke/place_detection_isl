@@ -29,7 +29,7 @@ DFCoefficients bubbleProcess::calculateDFCoefficients(const std::vector<bubblePo
     {
         angles[0] = bubble.at(i).panAng;
         angles[1] = bubble.at(i).tiltAng;
-        rho = bubble[i].val * 10 + 5;
+        rho = bubble[i].val * 1 + 1000;
 
         while (angles[0]<0 || angles[0]>360) {
             if (angles[0]<0)
