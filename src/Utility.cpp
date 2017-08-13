@@ -10,7 +10,7 @@ BasePoint::BasePoint(){
     this->invariants = Mat();
     this->id = 0;
 }
-
+//Reconstruct: Operator overloading created, since it was problematic in terms of invariants
 void BasePoint::operator = (const BasePoint& bp)
 {
     this->id = bp.id;

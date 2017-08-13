@@ -85,7 +85,6 @@ void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, 
 
     if(show)
     {
-
         namedWindow("filter");
 
         imshow("filter",resizedFilter);
@@ -97,23 +96,23 @@ void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, 
 
     if(save)
     {
-
         imwrite("filter.jpg",resizedFilter);
         qDebug()<<"Filter image saved";
     }
-
-
     filters.push_back(filterOrg);
 }
 std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
 {
     std::vector<Mat> results;
+    //Reconsturct: 8-bit gray image is converted to 32-bit float in order to get rid of overflow after filtering
     singleChannelImage.convertTo(singleChannelImage,CV_32FC1);
+    //Reconstruct: Maximum and minimum possible filter responses for scaling responses (Calculated with Matlab)
     std::pair<float,float> minMax[5] = {std::make_pair(-60506.34, 83692.17),
                                                  std::make_pair(-60761.93, 60761.93),
                                                  std::make_pair(-71329.80, 63222.63),
                                                  std::make_pair(-68296.54, 68296.54),
                                                  std::make_pair(-68296.54, 68296.54)};
+    /// TODO: Create a function to automatize possible minimum and maximum filter responses
     for(uint i = 0 ; i < filters.size(); i++)
     {
         Mat copyImage = singleChannelImage.clone();
@@ -124,6 +123,7 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
         cv::medianBlur(copyImage,blurred,3);
 
         cv::filter2D(blurred,result,result.depth(),filters[i]);
+        //Reconstruct: scaleResponse function added here
         scaleResponse(result,minMax[i],-500,1000);
         results.push_back(result);
     }
@@ -133,6 +133,8 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
 }
 
 void ImageProcess::scaleResponse(cv::Mat &response, std::pair<float,float> minMax, float newMin, float newMax){
+    //Reconstruct:This function is added, since response of the filter was varying within a huge interval.
+    //Also we get rid of the negative coefficients while obtaining DF Coefficients with this function
     response = (response - minMax.first) * (newMax - newMin) / (minMax.second - minMax.first) + newMin;
 }
 
@@ -144,6 +146,7 @@ Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int s
     // channel_0 hue channel_1 saturation channel_2 value
     std::vector<Mat> channels;
     cv::split(hsvImage,channels);
+    //Reconstruct: If hue channel is processed, do not change values, since it corresponds to another color
     if(channelNo == 0) return channels[0].clone();
 
     Mat result;

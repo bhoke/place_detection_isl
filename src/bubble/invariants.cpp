@@ -14,7 +14,7 @@ using namespace std;
 
 cv::Mat bubbleProcess::calculateInvariantsMat(DFCoefficients coeff, int harmonic1, int harmonic2)
 {
-
+    //Reconstruct: result matrix is transposed and unnecessary operations removed in next step.
     cv::Mat result(harmonic1*harmonic2,1,CV_32FC1);
 
     for (int m=0;m<harmonic1;m++)

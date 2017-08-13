@@ -75,6 +75,7 @@ bubbleStatistics bubbleProcess::calculateBubbleStatistics(const vector<bubblePoi
 }
 vector<vector<int> > bubbleProcess::calculateImagePanAngles(int focalLengthPixels, int imageWidth, int imageHeight)
 {
+    /// TODO: We can reduce the size to 1-D, 2-D is unnecessary
     vector<vector<int> > result(imageHeight, std::vector<int>(imageWidth));
 
 
@@ -84,33 +85,21 @@ vector<vector<int> > bubbleProcess::calculateImagePanAngles(int focalLengthPixel
         {
 
             int deltax = imageWidth/2 - j;
-
-
             float pan = atan2((double)deltax,(double)focalLengthPixels);
-
-
             int panInt = (pan*180)/M_PI;
-
 
             if(panInt < 0)   panInt += 360;
             else if(panInt > 359)   panInt -=360;
 
-
             result[i][j] = panInt;
-
         }
-
     }
 
     if(imagePanAngles.size() > 0){
 
         for(uint i = 0; i < imagePanAngles.size(); i++){
             imagePanAngles[i].clear();
-
             imagePanAngles.clear();
-
-            //  qDebug()<<imagePanAngles[0].size();
-            //  qDebug()<<imagePanAngles.size();
         }
     }
 
@@ -121,8 +110,8 @@ vector<vector<int> > bubbleProcess::calculateImagePanAngles(int focalLengthPixel
 }
 vector<vector<int> > bubbleProcess::calculateImageTiltAngles(int focalLengthPixels, int imageWidth, int imageHeight)
 {
+    /// TODO: We can reduce the size to 1-D, 2-D is unnecessary
     vector<vector<int> > result(imageHeight, std::vector<int>(imageWidth));
-
 
     for(int i = 0; i < imageHeight; i++){
 
@@ -149,11 +138,7 @@ vector<vector<int> > bubbleProcess::calculateImageTiltAngles(int focalLengthPixe
         for(uint i = 0; i < imageTiltAngles.size(); i++){
             imageTiltAngles[i].clear();
         }
-
         imageTiltAngles.clear();
-
-        //  qDebug()<<imageTiltAngles[0].size();
-        // qDebug()<<imageTiltAngles.size();
     }
 
     imageTiltAngles.resize(imageHeight,std::vector<int>(imageWidth));
@@ -164,16 +149,14 @@ vector<vector<int> > bubbleProcess::calculateImageTiltAngles(int focalLengthPixe
 vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage, float maxval)
 {
     vector<bubblePoint> result;
-    float minVal = FLT_MAX;
-    float maxVal = FLT_MIN;
     for(int i = 0; i < grayImage.rows; i++)
     {
         for(int j = 0; j < grayImage.cols; j++)
         {
             grayImage.convertTo(grayImage,CV_32FC1);
             float val = grayImage.at<float>(i,j)/maxval;
-            //qDebug() << "Val convert: " << val<< " = " << grayImage.at<float>(i,j) << " / " << maxval;
 
+            //Reconstructed: Value threshold is removed since it is not necessary anymore
             //            if(val > 0)
             //            {
             //    qDebug()<<pan<<" "<<tilt;
@@ -262,8 +245,7 @@ vector<bubblePoint> bubbleProcess::reduceBubble(std::vector<bubblePoint> bubble)
 
         bubblePoint pt;
 
-        //		int simCount = 1;
-
+        //Reconstructed: bubble.val threshold is removed, since it is not necessary anymore
         //		if(bubble[i].val < 1){
         pt = bubble[i];
         //double sum = bubble[i].val;
@@ -295,8 +277,6 @@ vector<bubblePoint> bubbleProcess::reduceBubble(std::vector<bubblePoint> bubble)
         //	bubble[i].val = 1.1; // remove the pt from scanning
         //		}
     }
-    // float minVal = FLT_MAX;
-    // float maxVal = FLT_MIN;
     for(int i = 0; i < 360; i++){
 
         for(int j = 0; j< 360; j++){

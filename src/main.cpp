@@ -620,9 +620,9 @@ void PlaceDetector::processImage()
       double minVal,maxVal;
       for(size_t j = 0; j < filteredVals.size(); j++)
       {
+        // Recnostruct: Second parameter of convertGrayImage2Bub is assigned to 1000, since filter response is scaled to [-500,1000]
         vector<bubblePoint> imgBubble = bubbleProcess::convertGrayImage2Bub(filteredVals[j],1000);
         minMaxLoc(filteredVals[j], &minVal, &maxVal);
-        //qDebug() << "Min Value: " << minVal << " Max Value: " << maxVal;
         vector<bubblePoint> reducedBubble = bubbleProcess::reduceBubble(imgBubble);
 
         DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedBubble,noHarmonics,noHarmonics);
