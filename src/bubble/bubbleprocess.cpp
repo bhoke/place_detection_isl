@@ -164,7 +164,8 @@ vector<vector<int> > bubbleProcess::calculateImageTiltAngles(int focalLengthPixe
 vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage, float maxval)
 {
     vector<bubblePoint> result;
-
+    float minVal = FLT_MAX;
+    float maxVal = FLT_MIN;
     for(int i = 0; i < grayImage.rows; i++)
     {
         for(int j = 0; j < grayImage.cols; j++)
@@ -176,7 +177,6 @@ vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage, float
             //            if(val > 0)
             //            {
             //    qDebug()<<pan<<" "<<tilt;
-
             bubblePoint pt;
 
             pt.panAng = imagePanAngles[i][j];
@@ -293,12 +293,10 @@ vector<bubblePoint> bubbleProcess::reduceBubble(std::vector<bubblePoint> bubble)
         //	result.push_back(pt);
 
         //	bubble[i].val = 1.1; // remove the pt from scanning
-
-
-
         //		}
     }
-
+    // float minVal = FLT_MAX;
+    // float maxVal = FLT_MIN;
     for(int i = 0; i < 360; i++){
 
         for(int j = 0; j< 360; j++){
@@ -319,5 +317,6 @@ vector<bubblePoint> bubbleProcess::reduceBubble(std::vector<bubblePoint> bubble)
             }
         }
     }
+    //qDebug() << "Min Value: " << minVal << " Max Value: " << maxVal;
     return result;
 }

@@ -25,11 +25,14 @@ DFCoefficients bubbleProcess::calculateDFCoefficients(const std::vector<bubblePo
     float f1,f2,rho;
     float angles[2];
 
+    float minVal = FLT_MAX;
+    float maxVal = FLT_MIN;
     for(uint i = 0; i < bubble.size(); i++)
     {
         angles[0] = bubble.at(i).panAng;
         angles[1] = bubble.at(i).tiltAng;
-        rho = bubble[i].val * 1 + 1000;
+
+        rho = bubble[i].val + 1;
 
         while (angles[0]<0 || angles[0]>360) {
             if (angles[0]<0)
@@ -56,12 +59,3 @@ DFCoefficients bubbleProcess::calculateDFCoefficients(const std::vector<bubblePo
     }
     return dfcoeff;
 }
-
-
-
-
-
-
-
-
-

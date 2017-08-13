@@ -5,11 +5,27 @@ Place::Place()
 
 }
 
+BasePoint::BasePoint(){
+    std::cout << "Constructor Callled(BasePoint)" << std::endl;
+    this->invariants = Mat();
+    this->id = 0;
+}
+
+void BasePoint::operator = (const BasePoint& bp)
+{
+    this->id = bp.id;
+    this->avgVal = bp.avgVal;
+    this->varVal = bp.varVal;
+    this->avgLas = bp.avgLas;
+    this->varLas = bp.varLas;
+    this->invariants = bp.invariants.clone();
+    this->status = bp.status;
+}
+
 Place::Place(int id)
 {
     this->id = id;
     this->memberIds = cv::Mat::zeros(1,1,CV_16UC1);
-
 }
 
 void Place::calculateMeanInvariant()
@@ -61,10 +77,6 @@ LearnedPlace::LearnedPlace(int id)
 
 void LearnedPlace::calculateMeanInvariant()
 {
-   // this->memberInvariants = wholeInvariants.clone();
-
-    // Mat avg;
-
     cv::reduce(this->memberInvariants,this->meanInvariant,1,CV_REDUCE_AVG);
 }
 

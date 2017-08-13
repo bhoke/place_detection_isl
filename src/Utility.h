@@ -13,6 +13,9 @@ using namespace cv;
 class BasePoint
 {
 public:
+    BasePoint();
+    //BasePoint(const BasePoint& bp);
+    void operator = (const BasePoint& bp);
     uint id;
     float avgVal;
     float varVal;
@@ -135,14 +138,6 @@ private:
     BasePoint previousBasePoint;
     BasePoint currentBasePoint;
     std::vector<BasePoint> basepointReservoir;
-
-
-
-
-
-
-
-
 };
 
 class TopologicalMap

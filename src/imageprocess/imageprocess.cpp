@@ -127,7 +127,8 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
         scaleResponse(result,minMax[i],-500,1000);
         results.push_back(result);
     }
-    std::cout << cv::norm(results[1],results[0]) << std::endl;
+    //cv::norm
+    //std::cout << cv::norm(results[1],results[0]) << std::endl;
     return results;
 }
 
@@ -142,25 +143,23 @@ Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int s
 
     // channel_0 hue channel_1 saturation channel_2 value
     std::vector<Mat> channels;
+    cv::split(hsvImage,channels);
+    if(channelNo == 0) return channels[0].clone();
 
     Mat result;
     result = Mat::zeros(rgbimage.rows,rgbimage.cols,CV_8UC1);
 
-    cv::split(hsvImage,channels);
-
     for(int i = 0; i < rgbimage.rows; i++)
     {
-
         for(int j = 0; j < rgbimage.cols; j++)
         {
-            uchar satval = channels[1].at<uchar>(i,j);
-            uchar valval = channels[2].at<uchar>(i,j);
+            uchar currentSat = channels[1].at<uchar>(i,j);
+            uchar currentVal = channels[2].at<uchar>(i,j);
 
-            if(valval > valLower && valval < valUpper)
+            if(currentVal > valLower && currentVal < valUpper)
             {
-                if(satval > satLower && satval < satUpper)
+                if(currentSat > satLower && currentSat < satUpper)
                 {
-                    //   if(hueval < 15 ) hueval = 180;
                     result.at<uchar>(i,j) = channels[channelNo].at<uchar>(i,j);
                 }
             }
