@@ -1,13 +1,12 @@
 <launch>
-
-	<node name="place_detection_node" pkg="place_detection_isl"
+	<node name="fr_cloudy" pkg="place_detection_isl"
 		output="screen"
 		type="place_detection_node" >
 		<param name="tau_w" type="int" value="3" />
 		<param name="tau_n" type="int" value="1" />
 		<param name="tau_p" type="int" value="15" />
 		<param name="tau_avgdiff" type="double" value="0.15" />
-		<param name="tau_inv" type="double" value="2000" />
+		<param name="tau_inv" type="double" value="50" />
 		<param name="tau_inv2" type="double" value="0" />
 		<param name="camera_topic" type="string" value="/axis/image_raw" />
 		<param name="image_width" type="int" value="640" />

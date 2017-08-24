@@ -136,7 +136,6 @@ bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints)
         for(uint i = 0; i < basepoints.size(); i++)
         {
             QByteArray arr = mat2ByteArray(basepoints[i].invariants);
-
             ids<<basepoints[i].id;
             avgVals<<basepoints[i].avgVal;
             varVals<<basepoints[i].varVal;
@@ -144,7 +143,8 @@ bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints)
             varLass<<basepoints[i].varLas;
             arrs<<arr;
             statuses<<basepoints[i].status;
-
+            if(i > 379  && i < 390)
+                qDebug() << qPrintable(arr);
         }
 
         query.addBindValue(ids);
@@ -372,9 +372,6 @@ bool DatabaseManager::insertPlace(const Place &place)
     }
 
     return false;
-
-
-
 }
 cv::Mat DatabaseManager::getPlaceMeanInvariant(int id)
 {

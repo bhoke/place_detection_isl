@@ -1,0 +1,16 @@
+<launch>
+  <group name="runAll">
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Histogram Equalization Launch/fr_hist_cloudy.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Histogram Equalization Launch/fr_hist_sunny.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Histogram Equalization Launch/fr_hist_night.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Maddern Launch/fr_maddern_cloudy.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Maddern Launch/fr_maddern_sunny.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Maddern Launch/fr_maddern_night.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Shakeri Launch/fr_shakeri_cloudy.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Shakeri Launch/fr_shakeri_sunny.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/Shakeri Launch/fr_shakeri_night.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/gammaDCT Launch/fr_gammadct_cloudy.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/gammaDCT Launch/fr_gammadct_sunny.launch" />
+    <include file="/home/berkanhoke/catkin_ws/src/place_detection_isl/Freiburg/gammaDCT Launch/fr_gammadct_night.launch" />
+  </group>
+</launch>
