@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <QFile>
-#include <QRgb>
+//#include <QRgb>
 #include <opencv2/opencv.hpp>
 
 struct bubblePoint{
@@ -39,7 +39,7 @@ class bubbleProcess : public QObject
 {
     Q_OBJECT
 public:
-    
+
     bubbleProcess();
 
     static DFCoefficients calculateDFCoefficients(const std::vector <bubblePoint>& bubble, int harmonic1, int harmonic2);

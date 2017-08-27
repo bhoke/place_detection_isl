@@ -125,7 +125,7 @@ public:
     int  twindow_counter;
 
     Place* currentPlace;
-    vector<Place> detectedPlaces;
+    std::vector<Place> detectedPlaces;
     uint placeID;
 
     std::vector<BasePoint> wholebasepoints;

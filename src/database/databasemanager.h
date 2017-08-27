@@ -7,6 +7,7 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
 #include <QFile>
+#include <QDataStream>
 #include <QDir>
 
 #define LASER_TYPE 55
@@ -78,11 +79,11 @@ public:
 private:
     QSqlDatabase db;
 
-    
+
 signals:
-    
+
 public slots:
-    
+
 };
 
 #endif // DATABASEMANAGER_H
