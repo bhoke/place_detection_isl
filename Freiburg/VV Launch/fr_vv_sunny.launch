@@ -14,13 +14,13 @@
 		<param name="focal_length_pixels" type="int" value="550" />
 		<param name="tau_val_mean" type="double" value="0.1" />
 		<param name="tau_val_var" type="double" value="0.01" />
-		<param name="sat_lower" type="int" value="5" />
-		<param name="sat_upper" type="int" value="250" />
-		<param name="val_lower" type="int" value="5" />
-		<param name="val_upper" type="int" value="250" />
+		<param name="sat_lower" type="int" value="10" />
+		<param name="sat_upper" type="int" value="255" />
+		<param name="val_lower" type="int" value="10" />
+		<param name="val_upper" type="int" value="255" />
 		<!-- DEBUG MODE SHOULD BE ALWAYS CHECKED -->
 		<param name="debug_mode" type="bool" value="true" />
-		<param name="file_path" type="string" value="/home/berkanhoke/Datasets/Freiburg/Org/Sunny/" />
+		<param name="file_path" type="string" value="/home/berkanhoke/Datasets/Freiburg/VV/Sunny/" />
 		<param name="use_previous_memory" type="bool" value="false" />
 		<param name="previous_memory_path" type="string" value="/home/berkanhoke/Runs/Original/Cloudy" />
 	</node>

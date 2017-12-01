@@ -10,7 +10,7 @@ Mat orgImg;
 
 Mat filter;
 
-static Mat filterOrg;
+//static Mat filterOrg;
 
 static std::vector<Mat> filters;
 
@@ -19,20 +19,10 @@ ImageProcess::ImageProcess()
 
 }
 
-void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, bool save, bool show)
+void ImageProcess::readFilter(QString fileName, bool transpose, bool save, bool show)
 {
 
-    filterOrg = Mat(filterSize,filterSize,CV_32FC1);
-
     QString dirr = fileName;
-
-    /* QString str;
-
-    str.setNum(filterNum);
-
-    dirr.append(str);
-
-    dirr.append(".txt"); */
 
     qDebug()<<"Dir is :"<<dirr;
 
@@ -48,31 +38,31 @@ void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, 
 
     QString line = stream.readLine();
 
-    double count = 0;
-
-    double count2 = 0;
+    int count = 0;
+    int filterSize;
+    std::vector<float> filterElems;
 
     while(line != NULL)
     {
-
-        filterOrg.at<float>(count,count2) = line.toFloat();
-
+        filterElems.push_back(line.toFloat());
+        //filterOrg.at<float>(count,count2) = line.toFloat();
         count++;
 
-
-        if(count == filterSize){
-
-            count2++;
-            count = 0;
-
-        }
-
         line = stream.readLine();
+    }
 
+    //filterOrg = Mat(filterSize,filterSize,CV_32FC1);
+    filterSize = sqrt(count);
+    bool perfectSquare = (filterSize*filterSize) == count ? true:false;
+    if(!perfectSquare)
+    {
+        qDebug() << "Number of elements in the file is not a perfect square";
+        return;
     }
 
     file.close();
 
+    Mat filterOrg = Mat(filterElems).reshape(1,filterSize);
 
     if(transpose)
         cv::transpose(filterOrg,filterOrg);
@@ -81,7 +71,7 @@ void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, 
 
     cv::Mat resizedFilter;
 
-    cv::resize(filter,resizedFilter,resizedFilter.size(),5,5);
+    cv::resize(filter,resizedFilter,cv::Size(),5,5);
 
     if(show)
     {
@@ -90,8 +80,6 @@ void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, 
         imshow("filter",resizedFilter);
 
         waitKey();
-
-        destroyWindow("filter");
     }
 
     if(save)
@@ -99,32 +87,36 @@ void ImageProcess::readFilter(QString fileName, int filterSize, bool transpose, 
         imwrite("filter.jpg",resizedFilter);
         qDebug()<<"Filter image saved";
     }
+//    std::cout << "Second Time Call Here:\n"<< filterOrg << std::endl;
     filters.push_back(filterOrg);
+    std::cout << "Call from vector here(readFilter): " << filters[0] << std::endl;
 }
 std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
 {
     std::vector<Mat> results;
     //Reconsturct: 8-bit gray image is converted to 32-bit float in order to get rid of overflow after filtering
-    singleChannelImage.convertTo(singleChannelImage,CV_32FC1);
+    singleChannelImage.convertTo(singleChannelImage,CV_32F);
     //Reconstruct: Maximum and minimum possible filter responses for scaling responses (Calculated with Matlab)
-    std::pair<float,float> minMax[5] = {std::make_pair(-60506.34, 83692.17),
-                                                 std::make_pair(-60761.93, 60761.93),
-                                                 std::make_pair(-71329.80, 63222.63),
-                                                 std::make_pair(-68296.54, 68296.54),
-                                                 std::make_pair(-68296.54, 68296.54)};
+    //  std::pair<float,float> minMax[5] = {std::make_pair(-60506.34, 83692.17),
+    //    std::make_pair(-60761.93, 60761.93),
+    //    std::make_pair(-71329.80, 63222.63),
+    //    std::make_pair(-68296.54, 68296.54),
+    //    std::make_pair(-68296.54, 68296.54)};
+//    std::cout << "Call from vector here(applyFilters): " << filters[0] << std::endl;
     /// TODO: Create a function to automatize possible minimum and maximum filter responses
     for(uint i = 0 ; i < filters.size(); i++)
     {
         Mat copyImage = singleChannelImage.clone();
 
-        Mat result = Mat::zeros(singleChannelImage.rows,singleChannelImage.cols,CV_32FC1);
+        Mat result;// = Mat::zeros(singleChannelImage.rows,singleChannelImage.cols,CV_32FC1);
         Mat blurred;
 
         cv::medianBlur(copyImage,blurred,3);
+        if (i == 0)
 
-        cv::filter2D(blurred,result,result.depth(),filters[i]);
+        cv::filter2D(blurred,result,CV_32F,filters[i]);
         //Reconstruct: scaleResponse function added here
-        scaleResponse(result,minMax[i],-500,1000);
+        //      scaleResponse(result,minMax[i],-500,1000);
         results.push_back(result);
     }
     //cv::norm

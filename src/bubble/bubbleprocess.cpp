@@ -176,7 +176,6 @@ vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage, float
                 if(pt.tiltAng < 0)pt.tiltAng += 360;
                 else if(pt.tiltAng > 359) pt.tiltAng -=360;*/
             pt.val = val;
-
             result.push_back(pt);
             //            }
         }
@@ -291,7 +290,6 @@ vector<bubblePoint> bubbleProcess::reduceBubble(std::vector<bubblePoint> bubble)
                 if(counts[i][j] > 1){
 
                     pt.val = vals[i][j]/counts[i][j];
-                    //qDebug("Vals: %f -- Counts: %f" , vals[i][j] , counts[i][j]);
                 }
                 result.push_back(pt);
             }

@@ -254,7 +254,7 @@ double compareHKCHISQR(Mat input1, Mat input2)
     {
         float in1 = input1.at<float>(i,0);
         float in2 = input2.at<float>(i,0);
-        //    std::cout << "in1 ve in2:  " << in1  << "  "<< in2 << std::endl;
+//            std::cout << "in1 ve in2:  " << in1  << "  "<< in2 << std::endl;
         double mul = (in1-in2)*(in1-in2);
         double ss =  in1+in2;
         summ += mul/ss;
@@ -348,7 +348,7 @@ int main (int argc, char** argv)
     path.append("/filtre0.txt");
     qDebug()<<path;
 
-    ImageProcess::readFilter(path,29,false,false,false);
+    ImageProcess::readFilter(path,false,false,false);
 
     path.clear();
     path = basepath;
@@ -356,7 +356,7 @@ int main (int argc, char** argv)
     path.append("/filtre6.txt");
     qDebug()<<path;
 
-    ImageProcess::readFilter(path,29,false,false,false);
+    ImageProcess::readFilter(path,false,false,false);
 
     path.clear();
     path = basepath;
@@ -365,7 +365,7 @@ int main (int argc, char** argv)
     qDebug()<<path;
 
 
-    ImageProcess::readFilter(path,29,false,false,false);
+    ImageProcess::readFilter(path,false,false,false);
 
     path.clear();
     path = basepath;
@@ -374,7 +374,7 @@ int main (int argc, char** argv)
     qDebug()<<path;
 
 
-    ImageProcess::readFilter(path,29,false,false,false);
+    ImageProcess::readFilter(path,false,false,false);
 
     path.clear();
     path = basepath;
@@ -383,7 +383,9 @@ int main (int argc, char** argv)
     path.append("/filtre36.txt");
     qDebug()<<path;
 
-    ImageProcess::readFilter(path,29,false,false,false);
+    ImageProcess::readFilter(path,false,false,false);
+
+    cv::destroyAllWindows();
 
     image_transport::Subscriber imageSub = it.subscribe(camera_topic.data(), 1, imageCallback,hints);
 
@@ -561,9 +563,9 @@ void PlaceDetector::processImage()
         imagefilePath.append("/rgb_");
         imagefilePath.append(QString::number(image_counter)).append(".jpg");
         imwrite(imagefilePath.toStdString().data(),currentImage);
-
+        std::cout << image_counter << std::endl;
         currentBasePoint.status = 0;
-        qDebug() << "Current Mean: " << statsVal.mean << "and" << statsVal.variance ;
+        //qDebug() << "Current Mean: " << statsVal.mean << "and" << statsVal.variance ;
         /*********************** WE CHECK FOR THE UNINFORMATIVENESS OF THE FRAME   *************************/
         if(statsVal.mean <= this->tau_val_mean || statsVal.variance <= this->tau_val_var)
         {
@@ -617,6 +619,7 @@ void PlaceDetector::processImage()
             Mat grayImage;
             cv::cvtColor(currentImage,grayImage,CV_BGR2GRAY);
             std::vector<Mat> filteredVals = ImageProcess::applyFilters(grayImage);
+//            std::cout << "Filtered Vals:" << filteredVals[0] << std::endl;
             for(size_t j = 0; j < filteredVals.size(); j++)
             {
                 // Recnostruct: Second parameter of convertGrayImage2Bub is assigned to 1000, since filter response is scaled to [-500,1000]
@@ -624,7 +627,6 @@ void PlaceDetector::processImage()
                 vector<bubblePoint> reducedBubble = bubbleProcess::reduceBubble(imgBubble);
 
                 DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedBubble,noHarmonics,noHarmonics);
-
                 Mat invariants = bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics,noHarmonics);
                 if(j==-1) // Set this to negative value to use hue channel, set 0 otherwise
                     totalInvariants = invariants.clone();
@@ -633,11 +635,11 @@ void PlaceDetector::processImage()
 
             }
             //bool similar = false;
+            const float norm_factor = 1e+04f;
 
-            const float norm_factor = 1e4;
             Mat normalizedInvariant =  totalInvariants / norm_factor;
             currentBasePoint.invariants = normalizedInvariant.clone();
-            std::cout << "Firsst element "<< currentBasePoint.invariants.at<float>(1,0) << std::endl;
+            //std::cout << "Firsst element "<< currentBasePoint.invariants.at<float>(1,0) << std::endl;
             // We don't have a previous base point
             if(previousBasePoint.id == 0)
             {
@@ -651,8 +653,8 @@ void PlaceDetector::processImage()
                 double result = compareHKCHISQR(currentBasePoint.invariants,previousBasePoint.invariants);
 
                 ///////////////////////////// IF THE FRAMES ARE COHERENT ///////////////////////////////////////////////////////////////////////////////////////////////////////
-                std::cout << "Result of coherency function for the " << previousBasePoint.id
-                          <<" and " << currentBasePoint.id << ": " <<result << std::endl;
+                 std::cout << "Result of coherency function for the " << previousBasePoint.id
+                           <<" and " << currentBasePoint.id << ": " <<result << std::endl;
                 if(result <= tau_inv) //&& result > tau_inv2)
                 {
                     ///  dbmanager.insertBasePoint(currentBasePoint);
@@ -733,7 +735,7 @@ void PlaceDetector::processImage()
                                 AB.insert( AB.end(), basepointReservoir.begin(), basepointReservoir.end() );
                                 currentPlace->members.clear();
                                 currentPlace->members = AB;
-                                qDebug()<< "Adding basepoint "<< AB.back().id << "to place" << currentPlace->id;
+                                //qDebug()<< "Adding basepoint "<< AB.back().id << "to place" << currentPlace->id;
 
                                 basepointReservoir.clear();
                             }
@@ -742,7 +744,7 @@ void PlaceDetector::processImage()
                     else
                     {
                         currentPlace->members.push_back(currentBasePoint);
-                        qDebug()<< "Adding basepoint "<< currentBasePoint.id << "to place" << currentPlace->id;
+                        //qDebug()<< "Adding basepoint "<< currentBasePoint.id << "to place" << currentPlace->id;
                     }
                 } // COHERENT
                 // else if(result <= tau_inv2)
@@ -902,9 +904,7 @@ PlaceDetector::PlaceDetector()
 bool TemporalWindow::checkExtensionStatus(uint currentID)
 {
     if(currentID - this->endPoint <= tau_n)
-    {
         return true;
-    }
 
     return false;
 }

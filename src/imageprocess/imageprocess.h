@@ -15,7 +15,7 @@ public:
 
     static void scaleResponse(cv::Mat &response, std::pair<float,float> minMax, float newMin, float newMax);
 
-    static void readFilter(QString fileName, int filterSize, bool transpose, bool save, bool show);
+    static void readFilter(QString fileName, bool transpose, bool save, bool show);
 
     static std::vector<Mat> applyFilters(Mat singleChannelImage);
 
