@@ -10,8 +10,6 @@ Mat orgImg;
 
 Mat filter;
 
-//static Mat filterOrg;
-
 static std::vector<Mat> filters;
 
 ImageProcess::ImageProcess()
@@ -36,15 +34,14 @@ void ImageProcess::readFilter(QString fileName, bool transpose, bool save, bool 
 
     QTextStream stream(&file);
 
-    QString line = stream.readLine();
-
     int count = 0;
     int filterSize;
-    std::vector<float> filterElems;
-
+//    std::vector<float> filterElems;
+    Mat_<float> filterOrg;
+    QString line = stream.readLine();
     while(line != NULL)
     {
-        filterElems.push_back(line.toFloat());
+        filterOrg.push_back(line.toFloat());
         //filterOrg.at<float>(count,count2) = line.toFloat();
         count++;
 
@@ -61,35 +58,10 @@ void ImageProcess::readFilter(QString fileName, bool transpose, bool save, bool 
     }
 
     file.close();
-
-    Mat filterOrg = Mat(filterElems).reshape(1,filterSize);
-
-    if(transpose)
-        cv::transpose(filterOrg,filterOrg);
-
-    cv::convertScaleAbs(filterOrg,filter,128,128);
-
-    cv::Mat resizedFilter;
-
-    cv::resize(filter,resizedFilter,cv::Size(),5,5);
-
-    if(show)
-    {
-        namedWindow("filter");
-
-        imshow("filter",resizedFilter);
-
-        waitKey();
-    }
-
-    if(save)
-    {
-        imwrite("filter.jpg",resizedFilter);
-        qDebug()<<"Filter image saved";
-    }
+    filterOrg = filterOrg.reshape(1,filterSize);
 //    std::cout << "Second Time Call Here:\n"<< filterOrg << std::endl;
     filters.push_back(filterOrg);
-    std::cout << "Call from vector here(readFilter): " << filters[0] << std::endl;
+//    std::cout << "Call from vector here(readFilter): " << filters[0] << std::endl;
 }
 std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
 {
@@ -102,7 +74,6 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
     //    std::make_pair(-71329.80, 63222.63),
     //    std::make_pair(-68296.54, 68296.54),
     //    std::make_pair(-68296.54, 68296.54)};
-//    std::cout << "Call from vector here(applyFilters): " << filters[0] << std::endl;
     /// TODO: Create a function to automatize possible minimum and maximum filter responses
     for(uint i = 0 ; i < filters.size(); i++)
     {
@@ -112,8 +83,6 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
         Mat blurred;
 
         cv::medianBlur(copyImage,blurred,3);
-        if (i == 0)
-
         cv::filter2D(blurred,result,CV_32F,filters[i]);
         //Reconstruct: scaleResponse function added here
         //      scaleResponse(result,minMax[i],-500,1000);
@@ -124,11 +93,11 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
     return results;
 }
 
-void ImageProcess::scaleResponse(cv::Mat &response, std::pair<float,float> minMax, float newMin, float newMax){
-    //Reconstruct:This function is added, since response of the filter was varying within a huge interval.
-    //Also we get rid of the negative coefficients while obtaining DF Coefficients with this function
-    response = (response - minMax.first) * (newMax - newMin) / (minMax.second - minMax.first) + newMin;
-}
+//void ImageProcess::scaleResponse(cv::Mat &response, std::pair<float,float> minMax, float newMin, float newMax){
+//    //Reconstruct:This function is added, since response of the filter was varying within a huge interval.
+//    //Also we get rid of the negative coefficients while obtaining DF Coefficients with this function
+//    response = (response - minMax.first) * (newMax - newMin) / (minMax.second - minMax.first) + newMin;
+//}
 
 Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int satLower, int satUpper, int valLower, int valUpper)
 {
