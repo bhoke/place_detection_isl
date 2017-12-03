@@ -17,7 +17,7 @@ ImageProcess::ImageProcess()
 
 }
 
-void ImageProcess::readFilter(QString fileName, bool transpose, bool save, bool show)
+void ImageProcess::readFilter(QString fileName)
 {
 
     QString dirr = fileName;
@@ -42,13 +42,9 @@ void ImageProcess::readFilter(QString fileName, bool transpose, bool save, bool 
     while(line != NULL)
     {
         filterOrg.push_back(line.toFloat());
-        //filterOrg.at<float>(count,count2) = line.toFloat();
         count++;
-
         line = stream.readLine();
     }
-
-    //filterOrg = Mat(filterSize,filterSize,CV_32FC1);
     filterSize = sqrt(count);
     bool perfectSquare = (filterSize*filterSize) == count ? true:false;
     if(!perfectSquare)
@@ -88,8 +84,6 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
         //      scaleResponse(result,minMax[i],-500,1000);
         results.push_back(result);
     }
-    //cv::norm
-    //std::cout << cv::norm(results[1],results[0]) << std::endl;
     return results;
 }
 
