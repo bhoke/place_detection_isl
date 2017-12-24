@@ -4,7 +4,7 @@
   <version>0.0.0</version>
   <description>place_detection_isl</description>
 
-  <maintainer email="hakan.karaoguz@boun.edu.tr">Hakan Karaoguz</maintainer>
+  <maintainer email="berkan.hoke@boun.edu.tr">Berkan Höke</maintainer>
 
   <license>BSD</license>
 
@@ -25,31 +25,9 @@
   <run_depend>opencv2</run_depend>
   <run_depend>cv_bridge</run_depend>
 
-
-
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
 
   </export>
 </package>
-
-<!-- <package>
-
-  <description brief="placeDetectionISL">
-
-     placeDetectionISL
-
-  </description>
-  <author>Hakan</author>
-  <license>BSD</license>
-  <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/placeDetectionISL</url>
-  <depend package="std_msgs"/>
-  <depend package="roscpp"/>
-  <depend package="rospy"/>
-  <depend package="image_transport"/>
-  <depend package="opencv2"/>
-  <depend package="cv_bridge"/>
-
-</package> -->

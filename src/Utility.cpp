@@ -6,7 +6,6 @@ Place::Place()
 }
 
 BasePoint::BasePoint(){
-    std::cout << "Constructor Callled(BasePoint)" << std::endl;
     this->invariants = Mat();
     this->id = 0;
 }

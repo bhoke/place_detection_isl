@@ -9,7 +9,6 @@ using namespace cv;
 // 1: uninformative
 // 2: incoherent
 
-
 class BasePoint
 {
 public:
@@ -116,9 +115,6 @@ public:
     int valLower;
     int valUpper;
 
-
-    int noHarmonics;
-
     cv::Mat currentImage;
 
     uint image_counter;
@@ -129,7 +125,6 @@ public:
     uint placeID;
 
     std::vector<BasePoint> wholebasepoints;
-
 
 private:
 

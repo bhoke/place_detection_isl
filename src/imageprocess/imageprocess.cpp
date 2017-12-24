@@ -17,81 +17,101 @@ ImageProcess::ImageProcess()
 
 }
 
-void ImageProcess::readFilter(QString fileName)
+void ImageProcess::readFilters(QString folderName, std::vector<int> filterIds)
 {
-
-    QString dirr = fileName;
-
-    qDebug()<<"Dir is :"<<dirr;
-
-    QFile file(dirr);
-
-    if(!file.open(QFile::ReadOnly))
-    {
-        qDebug()<<"Error! filter "<<fileName<<"could not be read returning...";
-        return;
-    }
-
-    QTextStream stream(&file);
-
-    int count = 0;
+    QString filterDir;
+    QFile file;
     int filterSize;
-//    std::vector<float> filterElems;
-    Mat_<float> filterOrg;
-    QString line = stream.readLine();
-    while(line != NULL)
-    {
-        filterOrg.push_back(line.toFloat());
-        count++;
-        line = stream.readLine();
-    }
-    filterSize = sqrt(count);
-    bool perfectSquare = (filterSize*filterSize) == count ? true:false;
-    if(!perfectSquare)
-    {
-        qDebug() << "Number of elements in the file is not a perfect square";
-        return;
+
+    for(int i = 0; i < filterIds.size(); i++){
+        filterDir = folderName + "/filtre" + QString::number(filterIds[i]) + ".txt";
+        qDebug()<<"Filter directory is :"<<filterDir;
+        file.setFileName(filterDir);
+
+        if(!file.open(QFile::ReadOnly))
+        {
+            qDebug()<<"Error! filter "<<folderName<<"could not be read returning...";
+            return;
+        }
+
+        QTextStream stream(&file);
+
+        int numElems = 0;
+
+        //    std::vector<float> filterElems;
+        Mat_<float> filterOrg;
+        QString line = stream.readLine();
+        while(line != NULL)
+        {
+            filterOrg.push_back(line.toFloat());
+            numElems++;
+            line = stream.readLine();
+        }
+        filterSize = sqrt(numElems);
+
+        bool perfectSquare = (filterSize*filterSize) == numElems ? true:false;
+
+        if(!perfectSquare)
+        {
+            qDebug() << "Number of elements in the file is not a perfect square";
+            return;
+        }
+
+        file.close();
+        filterOrg = filterOrg.reshape(1,filterSize);
+        scaleResponse(filterOrg);
+        filters.push_back(filterOrg);
     }
 
-    file.close();
-    filterOrg = filterOrg.reshape(1,filterSize);
-//    std::cout << "Second Time Call Here:\n"<< filterOrg << std::endl;
-    filters.push_back(filterOrg);
-//    std::cout << "Call from vector here(readFilter): " << filters[0] << std::endl;
 }
+
 std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
 {
     std::vector<Mat> results;
     //Reconsturct: 8-bit gray image is converted to 32-bit float in order to get rid of overflow after filtering
     singleChannelImage.convertTo(singleChannelImage,CV_32F);
-    //Reconstruct: Maximum and minimum possible filter responses for scaling responses (Calculated with Matlab)
-    //  std::pair<float,float> minMax[5] = {std::make_pair(-60506.34, 83692.17),
-    //    std::make_pair(-60761.93, 60761.93),
-    //    std::make_pair(-71329.80, 63222.63),
-    //    std::make_pair(-68296.54, 68296.54),
-    //    std::make_pair(-68296.54, 68296.54)};
-    /// TODO: Create a function to automatize possible minimum and maximum filter responses
     for(uint i = 0 ; i < filters.size(); i++)
     {
         Mat copyImage = singleChannelImage.clone();
+        Mat result;
+        //        Mat blurred;
 
-        Mat result;// = Mat::zeros(singleChannelImage.rows,singleChannelImage.cols,CV_32FC1);
-        Mat blurred;
-
-        cv::medianBlur(copyImage,blurred,3);
-        cv::filter2D(blurred,result,CV_32F,filters[i]);
-        //Reconstruct: scaleResponse function added here
-        //      scaleResponse(result,minMax[i],-500,1000);
+        //        cv::medianBlur(copyImage,blurred,3);
+        cv::filter2D(copyImage,result,CV_32F,filters[i]);
+        //Reconstruct: scaleResponse function added here to scale each filter [rho/2, 3*rho/2]
+        //        scaleResponse(filters[i]);
         results.push_back(result);
     }
     return results;
 }
 
-//void ImageProcess::scaleResponse(cv::Mat &response, std::pair<float,float> minMax, float newMin, float newMax){
-//    //Reconstruct:This function is added, since response of the filter was varying within a huge interval.
-//    //Also we get rid of the negative coefficients while obtaining DF Coefficients with this function
-//    response = (response - minMax.first) * (newMax - newMin) / (minMax.second - minMax.first) + newMin;
-//}
+void ImageProcess::scaleResponse(cv::Mat &response)
+{
+    int nCols = response.cols;
+    int nRows = response.rows;
+    float val,minResponse = 0.0f ,maxResponse = 0.0f;
+
+    if (response.isContinuous())
+    {
+        nCols *= nRows;
+        nRows = 1;
+    }
+
+    float *p;
+    for(int i = 0; i < nRows; ++i)
+    {
+        p = response.ptr<float>(i);
+        for (int j = 0; j < nCols; ++j)
+        {
+            val = p[j];
+            if (val < 0.0f )
+                minResponse += 255.0f * val;
+            else
+                maxResponse += 255.0f * val;
+        }
+    }
+    response = response / (maxResponse - minResponse);
+}
 
 Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int satLower, int satUpper, int valLower, int valUpper)
 {
@@ -101,7 +121,7 @@ Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int s
     // channel_0 hue channel_1 saturation channel_2 value
     std::vector<Mat> channels;
     cv::split(hsvImage,channels);
-    //Reconstruct: If hue channel is processed, do not change values, since it corresponds to another color
+
     if(channelNo == 0) return channels[0].clone();
 
     Mat result;
@@ -124,64 +144,4 @@ Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int s
         }
     }
     return result;
-}
-
-Mat ImageProcess::convertToIlluminationInvariant(const Mat &image,float lambda)
-{
-    Mat intensity,f;
-    cvtColor(image,intensity,CV_BGR2GRAY,1);
-    int rowCount = intensity.rows;
-    int colCount = intensity.cols;
-
-    Mat wiener_x = lambda*Mat::eye(rowCount,rowCount,CV_32F);
-    Mat wiener_y = lambda*Mat::eye(colCount,colCount,CV_32F);
-
-    intensity.setTo(1,intensity == 0);
-    intensity.convertTo(f,CV_32F);
-
-    cv::log(f,f);
-    Mat D_x = Mat::zeros(rowCount,rowCount,CV_32F);
-    Mat D_y = Mat::zeros(colCount,colCount,CV_32F);
-
-    int j=1;
-    float* p;
-    p = D_x.ptr<float>(0);
-    p[0] = 1.0; p[1] = -1.0;
-    p = D_x.ptr<float>(rowCount-1);
-    p[rowCount-2] = -1.0; p[rowCount-1] = 1.0;
-    for(int i=1;i < rowCount-1; ++i)
-    {
-        p = D_x.ptr<float>(i);
-        p[j-1] = -1.0;
-        p[j] = 2.0;
-        p[++j] = -1.0;
-    }
-
-    p = D_y.ptr<float>(0);
-    p[0] = 1.0; p[1] = -1.0;
-    p = D_y.ptr<float>(colCount-1);
-    p[colCount-2] = -1.0; p[colCount-1] = 1.0;
-    j = 1;
-    for(int i=1;i < colCount-1; ++i)
-    {
-        p = D_y.ptr<float>(i);
-        p[j-1] = -1.0;
-        p[j] = 2.0;
-        p[++j] = -1.0;
-    }
-    Mat mu_x,mu_y;
-
-    wiener_x = wiener_x + D_x;
-    wiener_y = wiener_y + D_y;
-
-    solve(wiener_x,f,mu_x,DECOMP_CHOLESKY);
-    solve(wiener_y,f.t(),mu_y,DECOMP_CHOLESKY);
-
-    Mat v_x = f - lambda*mu_x;
-    Mat v_y = f - lambda*mu_y.t();
-
-    Mat v = v_x + v_y;
-
-    normalize(v,v,0,1,NORM_MINMAX);
-    return v;
 }

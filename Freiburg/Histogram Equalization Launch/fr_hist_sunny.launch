@@ -13,7 +13,7 @@
 		<param name="image_width" type="int" value="640" />
 		<param name="image_height" type="int" value="480" />
 		<param name="focal_length_pixels" type="int" value="550" />
-		<param name="tau_val_mean" type="double" value="0.1" />
+		<param name="tau_val_mean" type="double" value="0.2" />
 		<param name="tau_val_var" type="double" value="0.01" />
 		<param name="sat_lower" type="int" value="10" />
 		<param name="sat_upper" type="int" value="255" />

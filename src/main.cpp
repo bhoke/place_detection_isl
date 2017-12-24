@@ -295,7 +295,6 @@ int main (int argc, char** argv)
     int img_width;
     int img_height;
     std::string camera_topic;
-    detector.noHarmonics = 10;
     detector.image_counter = 1;
 
     detector.shouldProcess = false;
@@ -335,55 +334,12 @@ int main (int argc, char** argv)
         pnh.getParam("previous_memory_path", detector.previousMemoryPath);
     }
 
-    bubbleProcess::calculateImagePanAngles(detector.focalLengthPixels,img_width,img_height);
-    bubbleProcess::calculateImageTiltAngles(detector.focalLengthPixels,img_width,img_height);
+    bubbleProcess::calculateImagePanAngles(detector.focalLengthPixels,img_width);
+    bubbleProcess::calculateImageTiltAngles(detector.focalLengthPixels,img_height);
 
-    QString basepath = QDir::homePath();
-    basepath.append("/visual_filters");
-
-    // QString basepath(filterPath.data.data());
-
-    QString path(basepath);
-
-    path.append("/filtre0.txt");
-    qDebug()<<path;
-
-    ImageProcess::readFilter(path,false,false,false);
-
-    path.clear();
-    path = basepath;
-
-    path.append("/filtre6.txt");
-    qDebug()<<path;
-
-    ImageProcess::readFilter(path,false,false,false);
-
-    path.clear();
-    path = basepath;
-
-    path.append("/filtre12.txt");
-    qDebug()<<path;
-
-
-    ImageProcess::readFilter(path,false,false,false);
-
-    path.clear();
-    path = basepath;
-
-    path.append("/filtre18.txt");
-    qDebug()<<path;
-
-
-    ImageProcess::readFilter(path,false,false,false);
-
-    path.clear();
-    path = basepath;
-
-
-    path.append("/filtre36.txt");
-    qDebug()<<path;
-
-    ImageProcess::readFilter(path,false,false,false);
+    QString filterPath = QDir::homePath() + "/visual_filters";
+    std::vector<int> filtersToRead = {0,6,12,18,36};
+    ImageProcess::readFilters(filterPath,filtersToRead);
 
     cv::destroyAllWindows();
 
@@ -536,25 +492,20 @@ void PlaceDetector::processImage()
     if(!currentImage.empty())
     {
         timer.stop();
-        //qint64 start = QDateTime::currentMSecsSinceEpoch();
-        //Mat ii_image = ImageProcess::convertToIlluminationInvariant(currentImage,0.05);
-        //qint64 end = QDateTime::currentMSecsSinceEpoch();
-        //qDebug() <<"Illumination - Invariant Process Time:"<< (end-start) << "ms" << endl;
 
         Mat hueChannel= ImageProcess::generateChannelImage(currentImage,0,satLower,satUpper,valLower,valUpper);
 
         Mat hueChannelFiltered;
 
         cv::medianBlur(hueChannel, hueChannelFiltered,3);
-
-        vector<bubblePoint> hueBubble = bubbleProcess::convertGrayImage2Bub(hueChannelFiltered,180);
+        vector<bubblePoint> hueBubble = bubbleProcess::convertGrayImage2Bub(hueChannelFiltered);
         vector<bubblePoint> reducedHueBubble = bubbleProcess::reduceBubble(hueBubble);
 
         Mat valChannel= ImageProcess::generateChannelImage(currentImage,2,satLower,satUpper,valLower,valUpper);
-        vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel,255);
+        vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel);
         vector<bubblePoint> reducedValBubble = bubbleProcess::reduceBubble(valBubble);
 
-        bubbleStatistics statsVal = bubbleProcess::calculateBubbleStatistics(reducedValBubble,255);
+        bubbleStatistics statsVal = bubbleProcess::calculateBubbleStatistics(reducedValBubble);
 
         currentBasePoint.avgVal = statsVal.mean;
         currentBasePoint.varVal = statsVal.variance;
@@ -563,7 +514,6 @@ void PlaceDetector::processImage()
         imagefilePath.append("/rgb_");
         imagefilePath.append(QString::number(image_counter)).append(".jpg");
         imwrite(imagefilePath.toStdString().data(),currentImage);
-        std::cout << image_counter << std::endl;
         currentBasePoint.status = 0;
         //qDebug() << "Current Mean: " << statsVal.mean << "and" << statsVal.variance ;
         /*********************** WE CHECK FOR THE UNINFORMATIVENESS OF THE FRAME   *************************/
@@ -611,24 +561,21 @@ void PlaceDetector::processImage()
         {
             Mat totalInvariants;
 
-            DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedHueBubble,noHarmonics,noHarmonics);
-            Mat hueInvariants = bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics, noHarmonics);
-
+            DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedHueBubble);
+            Mat hueInvariants = bubbleProcess::calculateInvariantsMat(dfcoeff);
             totalInvariants = hueInvariants.clone();
-
             Mat grayImage;
             cv::cvtColor(currentImage,grayImage,CV_BGR2GRAY);
             std::vector<Mat> filteredVals = ImageProcess::applyFilters(grayImage);
-//            std::cout << "Filtered Vals:" << filteredVals[0] << std::endl;
             for(size_t j = 0; j < filteredVals.size(); j++)
             {
-                // Recnostruct: Second parameter of convertGrayImage2Bub is assigned to 1000, since filter response is scaled to [-500,1000]
-                vector<bubblePoint> imgBubble = bubbleProcess::convertGrayImage2Bub(filteredVals[j],1000);
-                vector<bubblePoint> reducedBubble = bubbleProcess::reduceBubble(imgBubble);
+                std::vector<bubblePoint> imgBubble = bubbleProcess::convertGrayImage2Bub(filteredVals[j]);
+                std::vector<bubblePoint> reducedBubble = bubbleProcess::reduceBubble(imgBubble);
+                DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedBubble);
 
-                DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedBubble,noHarmonics,noHarmonics);
-                Mat invariants = bubbleProcess::calculateInvariantsMat(dfcoeff,noHarmonics,noHarmonics);
-                if(j==-1) // Set this to negative value to use hue channel, set 0 otherwise
+                Mat invariants = bubbleProcess::calculateInvariantsMat(dfcoeff);
+//                std::cout << "Mean Filter(" << j << "): " << cv::mean(invariants) << std::endl;
+                if(j==0) // Set this to negative value to use hue channel, set 0 otherwise
                     totalInvariants = invariants.clone();
                 else
                     cv::vconcat(totalInvariants, invariants, totalInvariants);
@@ -639,7 +586,7 @@ void PlaceDetector::processImage()
 
             Mat normalizedInvariant =  totalInvariants / norm_factor;
             currentBasePoint.invariants = normalizedInvariant.clone();
-            //std::cout << "Firsst element "<< currentBasePoint.invariants.at<float>(1,0) << std::endl;
+
             // We don't have a previous base point
             if(previousBasePoint.id == 0)
             {
@@ -649,9 +596,7 @@ void PlaceDetector::processImage()
             }
             else
             {
-
                 double result = compareHKCHISQR(currentBasePoint.invariants,previousBasePoint.invariants);
-
                 ///////////////////////////// IF THE FRAMES ARE COHERENT ///////////////////////////////////////////////////////////////////////////////////////////////////////
                  std::cout << "Result of coherency function for the " << previousBasePoint.id
                            <<" and " << currentBasePoint.id << ": " <<result << std::endl;
@@ -868,11 +813,6 @@ void PlaceDetector::processImage()
 
                             this->tempwin->members.push_back(currentBasePoint);
                         }
-                        /*     this->tempwin->endPoint = image_counter;
-
-            this->tempwin->members.push_back(currentBasePoint);
-
-            basepointReservoir.clear();*/
                     }
                 } //INCOHERENT
                 previousBasePoint = currentBasePoint;
