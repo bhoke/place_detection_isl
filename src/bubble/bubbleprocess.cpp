@@ -57,6 +57,8 @@ void bubbleProcess::calculateImagePanAngles(int focalLengthPixels, int imageWidt
     pan = atan2((double)deltax,(double)focalLengthPixels);
     qDebug() << (pan*180)/M_PI;
     panInt = (pan*180)/M_PI;
+    if(panInt < 0)
+        panInt += 360;
     imagePanAngles.push_back(panInt);
   }
 }
@@ -72,6 +74,8 @@ void bubbleProcess::calculateImageTiltAngles(int focalLengthPixels, int imageHei
     tilt = atan2((double)deltay,(double)focalLengthPixels);
     qDebug() << (tilt*180)/M_PI;;
     tiltInt = (tilt*180)/M_PI;
+    if(tiltInt < 0)
+        tiltInt += 360;
     imageTiltAngles.push_back(tiltInt);
   }
 }

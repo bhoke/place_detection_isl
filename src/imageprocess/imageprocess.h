@@ -17,7 +17,7 @@ public:
 
     static std::vector<Mat> applyFilters(Mat singleChannelImage);
 
-    static Mat generateChannelImage(const Mat& rgbimage, int channelNo, int satLower, int satUpper, int valLower, int valUpper);
+    static void generateChannelImage(const Mat& rgbimage, int satLower, int valLower, int valUpper,cv::Mat &hueChannel,cv::Mat &valChannel);
 
 };
 

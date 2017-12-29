@@ -6,10 +6,7 @@
 #include <QStringList>
 #include <QDateTime>
 
-Mat orgImg;
-
 Mat filter;
-
 static std::vector<Mat> filters;
 
 ImageProcess::ImageProcess()
@@ -35,10 +32,7 @@ void ImageProcess::readFilters(QString folderName, std::vector<int> filterIds)
         }
 
         QTextStream stream(&file);
-
         int numElems = 0;
-
-        //    std::vector<float> filterElems;
         Mat_<float> filterOrg;
         QString line = stream.readLine();
         while(line != NULL)
@@ -62,7 +56,6 @@ void ImageProcess::readFilters(QString folderName, std::vector<int> filterIds)
         scaleResponse(filterOrg);
         filters.push_back(filterOrg);
     }
-
 }
 
 std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
@@ -74,12 +67,9 @@ std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
     {
         Mat copyImage = singleChannelImage.clone();
         Mat result;
-        //        Mat blurred;
-
-        //        cv::medianBlur(copyImage,blurred,3);
+        //  Mat blurred;
+        //  cv::medianBlur(copyImage,blurred,3);
         cv::filter2D(copyImage,result,CV_32F,filters[i]);
-        //Reconstruct: scaleResponse function added here to scale each filter [rho/2, 3*rho/2]
-        //        scaleResponse(filters[i]);
         results.push_back(result);
     }
     return results;
@@ -113,35 +103,46 @@ void ImageProcess::scaleResponse(cv::Mat &response)
     response = response / (maxResponse - minResponse);
 }
 
-Mat ImageProcess::generateChannelImage(const Mat& rgbimage, int channelNo, int satLower, int satUpper, int valLower, int valUpper)
+void ImageProcess::generateChannelImage(const Mat& rgbimage, int satLower, int valLower, int valUpper,cv::Mat &hueChannel,cv::Mat &valChannel)
 {
     Mat hsvImage;
     cv::cvtColor(rgbimage,hsvImage,CV_BGR2HSV);
-
-    // channel_0 hue channel_1 saturation channel_2 value
+    cv::Mat satChannel;
+    int nRows = hsvImage.rows;
+    int nCols = hsvImage.cols;
+    //channels[0] hue
+    //channel[1] saturation
+    //channel[2] value
     std::vector<Mat> channels;
     cv::split(hsvImage,channels);
-
-    if(channelNo == 0) return channels[0].clone();
-
-    Mat result;
-    result = Mat::zeros(rgbimage.rows,rgbimage.cols,CV_8UC1);
-
-    for(int i = 0; i < rgbimage.rows; i++)
+    hueChannel = channels[0];
+    satChannel = channels[1];
+    valChannel = channels[2];
+    uchar *huePtr,*satPtr,*valPtr;
+    uchar huePix,satPix,valPix;
+    for(int i = 0; i < nRows; ++i)
     {
-        for(int j = 0; j < rgbimage.cols; j++)
+        huePtr = hueChannel.ptr<uchar>(i);
+        satPtr = satChannel.ptr<uchar>(i);
+        valPtr = valChannel.ptr<uchar>(i);
+        for (int j = 0; j < nCols; ++j)
         {
-            uchar currentSat = channels[1].at<uchar>(i,j);
-            uchar currentVal = channels[2].at<uchar>(i,j);
-
-            if(currentVal > valLower && currentVal < valUpper)
+            huePix = huePtr[j];satPix = satPtr[j];valPix = valPtr[j];
+            if(valPix < valLower)
             {
-                if(currentSat > satLower && currentSat < satUpper)
-                {
-                    result.at<uchar>(i,j) = channels[channelNo].at<uchar>(i,j);
-                }
+                valPix = valLower;
+                huePix = 0;
+                continue;
             }
+            else if(valPix > valUpper) valPix = valUpper;
+
+            if(satPix < satLower)
+            {
+                if( valPix < 128) huePix = 1;
+                else if(valPix < valUpper) huePix = 254;
+                else huePix = 255;
+            }
+            else huePix = huePix + 38;
         }
     }
-    return result;
 }

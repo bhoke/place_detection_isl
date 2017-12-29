@@ -493,17 +493,18 @@ void PlaceDetector::processImage()
     {
         timer.stop();
 
-        Mat hueChannel= ImageProcess::generateChannelImage(currentImage,0,satLower,satUpper,valLower,valUpper);
-
+        Mat hueChannel,valChannel;
+//        ImageProcess::generateChannelImage(currentImage,satLower,valLower,valUpper,hueChannel,valChannel);
+        ImageProcess::generateChannelImage(currentImage,satLower,valLower,valUpper,hueChannel,valChannel);
         Mat hueChannelFiltered;
 
         cv::medianBlur(hueChannel, hueChannelFiltered,3);
-        vector<bubblePoint> hueBubble = bubbleProcess::convertGrayImage2Bub(hueChannelFiltered);
-        vector<bubblePoint> reducedHueBubble = bubbleProcess::reduceBubble(hueBubble);
+        std::vector<bubblePoint> hueBubble = bubbleProcess::convertGrayImage2Bub(hueChannelFiltered);
+        std::vector<bubblePoint> reducedHueBubble = bubbleProcess::reduceBubble(hueBubble);
 
-        Mat valChannel= ImageProcess::generateChannelImage(currentImage,2,satLower,satUpper,valLower,valUpper);
-        vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel);
-        vector<bubblePoint> reducedValBubble = bubbleProcess::reduceBubble(valBubble);
+//        Mat valChannel= ImageProcess::generateChannelImage(currentImage,satLower,satUpper,valLower,valUpper);
+        std::vector<bubblePoint> valBubble = bubbleProcess::convertGrayImage2Bub(valChannel);
+        std::vector<bubblePoint> reducedValBubble = bubbleProcess::reduceBubble(valBubble);
 
         bubbleStatistics statsVal = bubbleProcess::calculateBubbleStatistics(reducedValBubble);
 
@@ -608,7 +609,6 @@ void PlaceDetector::processImage()
                     /// If we have a temporal window
                     if(tempwin)
                     {
-                        //qDebug() << "We had tempwin \n";
                         // Temporal window will extend, we are still looking for the next incoming frames
                         if(tempwin->checkExtensionStatus(currentBasePoint.id))
                         {
@@ -622,7 +622,6 @@ void PlaceDetector::processImage()
                             // This is a valid temporal window
                             if(tempwin->endPoint - tempwin->startPoint >= tau_w && area>= tau_avgdiff)
                             {
-                                //qDebug() << tempwin->startPoint << " - " << tempwin->endPoint << "is valid \n";
                                 qDebug()<<"New Place";
                                 currentPlace->calculateMeanInvariant();
 
@@ -652,7 +651,6 @@ void PlaceDetector::processImage()
                                 currentPlace = 0;
 
                                 currentPlace = new Place(this->placeID);
-                                qDebug()<< "Adding the basepoint "<< currentBasePoint.id << "to place" << currentPlace->id;
                                 basepointReservoir.push_back(currentBasePoint);
 
                                 currentPlace->members = basepointReservoir;
@@ -722,11 +720,9 @@ void PlaceDetector::processImage()
                     // add the basepoint to the temporal window
                     else
                     {
-                        qDebug() << "We had tempwin(incoherent) \n";
                         // Temporal window will extend, we are still looking for the next incoming frames
                         if(tempwin->checkExtensionStatus(currentBasePoint.id))
                         {
-                            qDebug() << "We extend tempwin(incoherent) \n";
                             this->tempwin->endPoint = image_counter;
 
                             this->tempwin->members.push_back(currentBasePoint);
@@ -737,7 +733,6 @@ void PlaceDetector::processImage()
                         }
                         else
                         {
-                            qDebug() << "tempwin does not extend, we check if it is valid \n" ;
                             float avgdiff;
 
                             avgdiff = this->tempwin->totalDiff/(tempwin->endPoint - tempwin->startPoint+1);
