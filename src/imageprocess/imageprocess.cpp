@@ -100,7 +100,7 @@ void ImageProcess::scaleResponse(cv::Mat &response)
                 maxResponse += 255.0f * val;
         }
     }
-    response = response / (maxResponse - minResponse);
+    response /= (maxResponse - minResponse);
 }
 
 void ImageProcess::generateChannelImage(const Mat& rgbimage, int satLower, int valLower, int valUpper,cv::Mat &hueChannel,cv::Mat &valChannel)

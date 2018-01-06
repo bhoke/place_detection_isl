@@ -46,8 +46,6 @@ public:
     static  cv::Mat calculateInvariantsMat(DFCoefficients coeff);
     static bubbleStatistics calculateBubbleStatistics(const vector<bubblePoint>& bubble);
 
-    // Round double to int
-    static double round(double num);
     // Reduces the number of points in a bubble by combining points falling in the same patch
     static vector<bubblePoint> reduceBubble(vector<bubblePoint>bubble);
 

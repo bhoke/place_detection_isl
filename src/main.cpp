@@ -560,33 +560,35 @@ void PlaceDetector::processImage()
         /***********************************  IF THE FRAME IS INFORMATIVE *************************************************/
         else
         {
-            Mat totalInvariants;
+            // Hue Channel Processing
+            DFCoefficients hueDFC = bubbleProcess::calculateDFCoefficients(reducedHueBubble);
+            cv::Mat hueInvariants = bubbleProcess::calculateInvariantsMat(hueDFC);
 
-            DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedHueBubble);
-            Mat hueInvariants = bubbleProcess::calculateInvariantsMat(dfcoeff);
-            totalInvariants = hueInvariants.clone();
-            Mat grayImage;
+            // Intensity Channel Processing
+            cv::Mat grayImage;
             cv::cvtColor(currentImage,grayImage,CV_BGR2GRAY);
             std::vector<Mat> filteredVals = ImageProcess::applyFilters(grayImage);
+            size_t invariantSize = filteredVals.size()*HARMONIC1*HARMONIC2;
+            cv::Mat intensityInvariants;
+            intensityInvariants.reserve(invariantSize);
+            DFCoefficients intensityDFC;
+            std::vector<bubblePoint> imgBubble,reducedBubble;
+
             for(size_t j = 0; j < filteredVals.size(); j++)
             {
-                std::vector<bubblePoint> imgBubble = bubbleProcess::convertGrayImage2Bub(filteredVals[j]);
-                std::vector<bubblePoint> reducedBubble = bubbleProcess::reduceBubble(imgBubble);
-                DFCoefficients dfcoeff = bubbleProcess::calculateDFCoefficients(reducedBubble);
-
-                Mat invariants = bubbleProcess::calculateInvariantsMat(dfcoeff);
-//                std::cout << "Mean Filter(" << j << "): " << cv::mean(invariants) << std::endl;
-                if(j==0) // Set this to negative value to use hue channel, set 0 otherwise
-                    totalInvariants = invariants.clone();
-                else
-                    cv::vconcat(totalInvariants, invariants, totalInvariants);
-
+                imgBubble = bubbleProcess::convertGrayImage2Bub(filteredVals[j]);
+                reducedBubble = bubbleProcess::reduceBubble(imgBubble);
+                intensityDFC = bubbleProcess::calculateDFCoefficients(reducedBubble);
+                Mat invariants = bubbleProcess::calculateInvariantsMat(intensityDFC);
+                intensityInvariants.push_back(invariants);
             }
             //bool similar = false;
-            const float norm_factor = 1e+04f;
+            const float normFactor_int = 1e+02f,normFactor_hue = 1e+08f;
 
-            Mat normalizedInvariant =  totalInvariants / norm_factor;
-            currentBasePoint.invariants = normalizedInvariant.clone();
+            Mat normalizedIntInvariant =  intensityInvariants / normFactor_int;
+            Mat normalizedHueInvariant =  hueInvariants / normFactor_hue;
+            currentBasePoint.intensityInvariants = normalizedIntInvariant.clone();
+            currentBasePoint.hueInvariants = normalizedHueInvariant;
 
             // We don't have a previous base point
             if(previousBasePoint.id == 0)
@@ -597,11 +599,14 @@ void PlaceDetector::processImage()
             }
             else
             {
-                double result = compareHKCHISQR(currentBasePoint.invariants,previousBasePoint.invariants);
+                double intensityCoh = compareHKCHISQR(currentBasePoint.intensityInvariants,previousBasePoint.intensityInvariants);
+                double hueCoh = compareHKCHISQR(currentBasePoint.hueInvariants,previousBasePoint.hueInvariants);
                 ///////////////////////////// IF THE FRAMES ARE COHERENT ///////////////////////////////////////////////////////////////////////////////////////////////////////
-                 std::cout << "Result of coherency function for the " << previousBasePoint.id
-                           <<" and " << currentBasePoint.id << ": " <<result << std::endl;
-                if(result <= tau_inv) //&& result > tau_inv2)
+                 std::cout << "Result of intensity coherency function for the " << previousBasePoint.id
+                           <<" and " << currentBasePoint.id << ": " <<intensityCoh << std::endl;
+                 std::cout << "Result of hue coherency function for the " << previousBasePoint.id
+                           <<" and " << currentBasePoint.id << ": " <<hueCoh << std::endl;
+                if(intensityCoh <= tau_inv && hueCoh <= tau_inv) //&& result > tau_inv2)
                 {
                     ///  dbmanager.insertBasePoint(currentBasePoint);
                     wholebasepoints.push_back(currentBasePoint);
@@ -713,7 +718,7 @@ void PlaceDetector::processImage()
                         this->tempwin->startPoint = image_counter;
                         this->tempwin->endPoint = image_counter;
                         this->tempwin->id = twindow_counter;
-                        this->tempwin->totalDiff +=result;
+                        this->tempwin->totalDiff +=intensityCoh;
                         this->tempwin->members.push_back(currentBasePoint);
 
                     }
@@ -727,7 +732,7 @@ void PlaceDetector::processImage()
 
                             this->tempwin->members.push_back(currentBasePoint);
 
-                            this->tempwin->totalDiff +=result;
+                            this->tempwin->totalDiff +=intensityCoh;
 
                             basepointReservoir.clear();
                         }

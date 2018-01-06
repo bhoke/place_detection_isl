@@ -3,9 +3,6 @@
 #include <QTextStream>
 #include <math.h>
 #include <QDebug>
-double bubbleProcess::round(double r) {
-  return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
-}
 
 static vector<int> imagePanAngles;
 static vector<int> imageTiltAngles;
@@ -17,19 +14,10 @@ bubbleProcess::bubbleProcess()
 bubbleStatistics bubbleProcess::calculateBubbleStatistics(const vector<bubblePoint>& bubble)
 {
   bubbleStatistics result;
-
-  // cv::Mat bubbleArr(1,bubble.size(),CV_32FC1);
   std::vector<float> values(bubble.size());
 
-  //qDebug()<<bubble.size();
-
   for(uint i = 0; i < bubble.size(); i++)
-
-  {
-    values[i] = bubble.at(i).val;
-    //bubbleArr.at<float>(1,i) = (float)bubble.at(i).val;
-    //qDebug()<<values[i];
-  }
+      values[i] = bubble.at(i).val;
 
   cv::Scalar summ = cv::sum(values);
 
@@ -37,8 +25,7 @@ bubbleStatistics bubbleProcess::calculateBubbleStatistics(const vector<bubblePoi
 
   if(result.mean > 1.0) result.mean = 1.0;
 
-  cv::Scalar mean;
-  cv::Scalar stddev;
+  cv::Scalar mean,stddev;
 
   cv::meanStdDev(values,mean,stddev);
 
@@ -50,12 +37,10 @@ void bubbleProcess::calculateImagePanAngles(int focalLengthPixels, int imageWidt
 {
   int deltax,panInt;
   float pan;
-  qDebug() << "Pan Angles:";
   for(int i = imageWidth-1; i > -1; i--)
   {
     deltax = imageWidth/2 - i;
     pan = atan2((double)deltax,(double)focalLengthPixels);
-    qDebug() << (pan*180)/M_PI;
     panInt = (pan*180)/M_PI;
     if(panInt < 0)
         panInt += 360;
@@ -67,12 +52,10 @@ void bubbleProcess::calculateImageTiltAngles(int focalLengthPixels, int imageHei
 {
   int deltay,tiltInt;
   float tilt;
-  qDebug() << "Tilt Angles:";
   for(int i = imageHeight-1; i > -1; i--)
   {
     deltay = imageHeight/2 - i;
     tilt = atan2((double)deltay,(double)focalLengthPixels);
-    qDebug() << (tilt*180)/M_PI;;
     tiltInt = (tilt*180)/M_PI;
     if(tiltInt < 0)
         tiltInt += 360;

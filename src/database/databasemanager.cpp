@@ -135,7 +135,7 @@ bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints)
 
         for(uint i = 0; i < basepoints.size(); i++)
         {
-            QByteArray arr = mat2ByteArray(basepoints[i].invariants);
+            QByteArray arr = mat2ByteArray(basepoints[i].intensityInvariants);
             ids<<basepoints[i].id;
             avgVals<<basepoints[i].avgVal;
             varVals<<basepoints[i].varVal;

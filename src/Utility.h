@@ -20,7 +20,8 @@ public:
     float varVal;
     float avgLas;
     float varLas;
-    cv::Mat invariants;
+    cv::Mat intensityInvariants;
+    cv::Mat hueInvariants;
     int status;
 };
 
@@ -37,7 +38,6 @@ public:
     Mat memberInvariants;
     Mat meanInvariant;
     void calculateMeanInvariant();
-
 };
 
 class LearnedPlace
