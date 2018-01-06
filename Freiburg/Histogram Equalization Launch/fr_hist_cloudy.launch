@@ -15,9 +15,7 @@
 		<param name="tau_val_mean" type="double" value="0.1" />
 		<param name="tau_val_var" type="double" value="0.01" />
 		<param name="sat_lower" type="int" value="10" />
-		<param name="sat_upper" type="int" value="250" />
 		<param name="val_lower" type="int" value="10" />
-		<param name="val_upper" type="int" value="250" />
 		<!-- DEBUG MODE SHOULD BE ALWAYS CHECKED -->
 		<param name="debug_mode" type="bool" value="true" />
 		<param name="file_path" type="string" value="/home/berkanhoke/Datasets/Freiburg/Histeq/Cloudy/" />
