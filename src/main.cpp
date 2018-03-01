@@ -145,8 +145,8 @@ bool saveParameters(QString filepath)
         str<<"focal_length_pixels "<<detector.focalLengthPixels<<"\n";
         str<<"tau_val_mean "<<detector.tau_val_mean<<"\n";
         str<<"tau_val_var "<<detector.tau_val_var<<"\n";
-        str<<"sat_lower "<<detector.sat_lower<<"\n";
-        str<<"val_lower "<<detector.val_lower<<"\n";
+        str<<"sat_lower "<<detector.satLower<<"\n";
+        str<<"val_lower "<<detector.valLower<<"\n";
         str<<"debug_mode "<<detector.debugMode<<"\n";
         str<<"debug_filePath "<<QString::fromStdString(detector.debugFilePath)<<"\n";
 
@@ -310,15 +310,14 @@ int main (int argc, char** argv)
     pnh.getParam("tau_val_mean",detector.tau_val_mean);
     pnh.getParam("tau_val_var",detector.tau_val_var);
     pnh.getParam("sat_lower",detector.satLower);
-    pnh.getParam("sat_upper",detector.satUpper);
     pnh.getParam("val_lower",detector.valLower);
-    pnh.getParam("val_upper",detector.valUpper);
+    detector.valUpper = 250;
     /***** GET THE DEBUG MODE ****************/
 
     pnh.getParam("debug_mode",detector.debugMode);
     pnh.getParam("file_path", detector.debugFilePath);
 
-    qDebug()<<"Saturation and Value thresholds"<<detector.satLower<<detector.satUpper<<detector.valLower<<detector.valUpper<<detector.tau_avgdiff;
+    qDebug()<<"Saturation and Value thresholds"<<detector.satLower<<detector.valLower<<detector.valUpper<<detector.tau_avgdiff;
 
     if(detector.debugMode)
     {

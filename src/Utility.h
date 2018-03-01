@@ -111,7 +111,6 @@ public:
     double tau_val_var;
 
     int satLower;
-    int satUpper;
     int valLower;
     int valUpper;
 
