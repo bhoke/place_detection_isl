@@ -30,8 +30,8 @@ MESSAGE( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 SET(bubble_space_SOURCES
   src/bubble/bubbleprocess.cpp
   src/database/databasemanager.cpp
-  src/bubble/dfc.cpp
-  src/bubble/invariants.cpp
+  #src/bubble/dfc.cpp
+  #src/bubble/invariants.cpp
   src/imageprocess/imageprocess.cpp
   src/Utility.cpp
 )
@@ -44,6 +44,6 @@ SET(bubble_space_HEADERS
 )
 
 ADD_LIBRARY(${PROJECT_NAME} src/main.cpp)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} opencv_highgui opencv_imgproc opencv_core opencv_imgcodecs ${catkin_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui ${catkin_LIBRARIES})
 ADD_EXECUTABLE(place_detection_node src/main.cpp ${bubble_space_SOURCES} ${bubble_space_HEADERS_MOC})
 TARGET_LINK_LIBRARIES(place_detection_node ${PROJECT_NAME} Qt5::Widgets Qt5::Sql)

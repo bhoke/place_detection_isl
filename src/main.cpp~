@@ -236,6 +236,7 @@ void startStopCallback(const std_msgs::Int16 startstopSignal)
     {
         detector.shouldProcess = false;
     }
+
 }
 
 double compareHKCHISQR(Mat input1, Mat input2)
@@ -258,6 +259,7 @@ double compareHKCHISQR(Mat input1, Mat input2)
         // std::cout << "Mul, ss, summ:  " << mul << "  " << ss << "  "  << mul/ss << std::endl;
         //        qDebug()<< "CHISQR " <<mul<<ss<<summ;
     }
+
     return summ;
 }
 
@@ -623,7 +625,7 @@ void PlaceDetector::processImage()
                         {
                             float area = this->tempwin->totalDiff/(tempwin->endPoint - tempwin->startPoint+1);
                             // This is a valid temporal window
-                            if(tempwin->endPoint - tempwin->startPoint >= tau_w )//&& area>= tau_avgdiff)
+                            if(tempwin->endPoint - tempwin->startPoint >= tau_w && area>= tau_avgdiff)
                             {
                                 qDebug()<<"New Place";
                                 currentPlace->calculateMeanInvariant();

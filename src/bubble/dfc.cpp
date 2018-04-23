@@ -13,14 +13,9 @@ using namespace std;
 
 #define PI 3.14
 
-DFCoefficients bubbleProcess::calculateDFCoefficients(const std::vector<bubblePoint>& bubble, int harmonic1, int harmonic2)
+DFCoefficients bubbleProcess::calculateDFCoefficients(const std::vector<bubblePoint>& bubble)
 {
     DFCoefficients dfcoeff;
-
-    dfcoeff.a.resize(harmonic1, std::vector<float>(harmonic2, 0));
-    dfcoeff.b.resize(harmonic1, std::vector<float>(harmonic2, 0));
-    dfcoeff.c.resize(harmonic1, std::vector<float>(harmonic2, 0));
-    dfcoeff.d.resize(harmonic1, std::vector<float>(harmonic2, 0));
 
     float f1,f2,rho;
     float angles[2];
@@ -45,8 +40,8 @@ DFCoefficients bubbleProcess::calculateDFCoefficients(const std::vector<bubblePo
                 angles[1]=angles[1]-360;
         }
 
-        for (int m=0;m<harmonic1;m++)
-            for (int n=0;n<harmonic2;n++) {
+        for (int m=0;m<HARMONIC1;m++)
+            for (int n=0;n<HARMONIC2;n++) {
                 f1= angles[0];
                 f2= angles[1];
                 dfcoeff.a[m][n] += rho*cos(m*f1*PI/180)*cos(n*f2*PI/180)*4;

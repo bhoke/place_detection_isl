@@ -9,7 +9,6 @@ using namespace cv;
 // 1: uninformative
 // 2: incoherent
 
-
 class BasePoint
 {
 public:
@@ -21,7 +20,8 @@ public:
     float varVal;
     float avgLas;
     float varLas;
-    cv::Mat invariants;
+    cv::Mat intensityInvariants;
+    cv::Mat hueInvariants;
     int status;
 };
 
@@ -38,7 +38,6 @@ public:
     Mat memberInvariants;
     Mat meanInvariant;
     void calculateMeanInvariant();
-
 };
 
 class LearnedPlace
@@ -47,6 +46,7 @@ class LearnedPlace
 public:
 
     LearnedPlace();
+    LearnedPlace(Place aPlace);
     LearnedPlace(int id);
     uint id;
     // This is a Mx1 vector that will store merged place ids
@@ -57,7 +57,8 @@ public:
     Mat memberInvariants;
     Mat meanInvariant;
     void calculateMeanInvariant();
-
+public:
+    static int lpCounter;
 };
 
 
@@ -76,8 +77,6 @@ public:
     // Holds the value of total incoherency inside the temporal window
     float totalDiff;
 };
-
-
 
 class PlaceDetector
 {
@@ -112,12 +111,8 @@ public:
     double tau_val_var;
 
     int satLower;
-    int satUpper;
     int valLower;
     int valUpper;
-
-
-    int noHarmonics;
 
     cv::Mat currentImage;
 
@@ -130,7 +125,6 @@ public:
 
     std::vector<BasePoint> wholebasepoints;
 
-
 private:
 
     TemporalWindow* tempwin;
@@ -139,35 +133,6 @@ private:
     BasePoint currentBasePoint;
     std::vector<BasePoint> basepointReservoir;
 };
-
-class TopologicalMap
-{
-public:
-
-    std::vector< std::pair<int,int> > connections;
-
-};
-
-class Level
-{
-
-public:
-
-    Level();
-    ~Level();
-    std::vector<uint> members;
-    std::vector<int> parentNodes;
-    double val;
-    //  Connection index bize max parent node numarasini veriyor. Bu node bu noktadan bagli
-    uint connectionIndex;
-    // Mean Invariant bize bu level in ortalama invariant vectorunu veriyor
-    std::vector<float> meanInvariant;
-
-
-
-
-};
-
 
 
 #endif // UTILITY_H

@@ -11,15 +11,13 @@ public:
 
     ImageProcess();
 
-    static Mat convertToIlluminationInvariant(const Mat& image, float lambda);
+    static void scaleResponse(Mat &response);
 
-    static void scaleResponse(cv::Mat &response, std::pair<float,float> minMax, float newMin, float newMax);
-
-    static void readFilter(QString fileName, int filterSize, bool transpose, bool save, bool show);
+    static void readFilters(QString folderName, std::vector<int> filterIds);
 
     static std::vector<Mat> applyFilters(Mat singleChannelImage);
 
-    static Mat generateChannelImage(const Mat& rgbimage, int channelNo, int satLower, int satUpper, int valLower, int valUpper);
+    static void generateChannelImage(const Mat& rgbimage, int satLower, int valLower, int valUpper,cv::Mat &hueChannel,cv::Mat &valChannel);
 
 };
 
