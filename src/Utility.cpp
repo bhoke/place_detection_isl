@@ -1,8 +1,9 @@
 #include "Utility.h"
+
+int LearnedPlace::lpCounter;
 Place::Place()
 {
     id = -1;
-
 }
 
 BasePoint::BasePoint(){
@@ -54,14 +55,28 @@ void Place::calculateMeanInvariant()
 LearnedPlace::LearnedPlace()
 {
     id = -1;
-
 }
 
 LearnedPlace::LearnedPlace(int id)
 {
     this->id = id;
     this->memberIds = cv::Mat::zeros(1,1,CV_16UC1);
+}
 
+LearnedPlace::LearnedPlace (Place place)
+{
+    this->id = LearnedPlace::lpCounter;
+    this->meanInvariant = place.meanInvariant;
+    this->memberInvariants = place.memberInvariants;
+    this-> memberIds = place.memberIds;
+
+    if(this->memberPlaces.empty())
+    {
+        this->memberPlaces = cv::Mat(1,1,CV_16UC1);
+        this->memberPlaces.at<unsigned short>(0,0) = (unsigned short)place.id;
+    }
+
+    lpCounter++;
 }
 
 void LearnedPlace::calculateMeanInvariant()

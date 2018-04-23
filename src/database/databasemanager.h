@@ -19,7 +19,6 @@ class TemporalWindow;
 class BasePoint;
 class LearnedPlace;
 class Level;
-//class TopologicalMap;
 
 class DatabaseManager : public QObject
 {
@@ -57,11 +56,7 @@ public:
 
     LearnedPlace getLearnedPlace(int id);
 
-    bool insertTopologicalMapRelation(int id, std::pair<int,int> relation);
-
     bool insertBDSTLevel(int id, const Level& aLevel);
-
-    //  TopologicalMap getTopologicalMap(int id);
 
     cv::Mat getPlaceMeanInvariant(int id);
 

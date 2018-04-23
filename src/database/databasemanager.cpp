@@ -196,27 +196,7 @@ bool DatabaseManager::insertTemporalWindow(const TemporalWindow &twindow)
     return false;
 
 }
-bool DatabaseManager::insertTopologicalMapRelation(int id, std::pair<int,int> relation)
-{
-    if(db.isOpen())
-    {
-        QSqlQuery query(QSqlDatabase::database("knowledge"));
 
-        query.prepare(QString("replace into topologicalmap values(?, ?, ?)"));
-
-        query.addBindValue(id);
-        query.addBindValue(relation.first);
-        query.addBindValue(relation.second);
-
-        bool ret = query.exec();
-
-        return ret;
-
-    }
-
-    return false;
-
-}
 int DatabaseManager::getLearnedPlaceMaxID()
 {
     if(db.isOpen())
@@ -272,40 +252,6 @@ bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
     return false;
 
 }
-bool DatabaseManager::insertBDSTLevel(int id, const Level &aLevel)
-{
-    Mat members(aLevel.members);
-    QByteArray arr= mat2ByteArray(members);
-
-    //  QByteArray arr2 =
-
-    Mat meanInvariant(aLevel.meanInvariant);
-    QByteArray arr2 = mat2ByteArray(meanInvariant);
-
-    if(db.isOpen())
-    {
-
-        QSqlQuery query(QSqlDatabase::database("knowledge"));
-
-        query.prepare(QString("replace into cuetree values(?, ?, ?, ?, ?)"));
-
-        query.addBindValue(id);
-        query.addBindValue(arr);
-        query.addBindValue(aLevel.connectionIndex);
-        query.addBindValue(arr2);
-        query.addBindValue(aLevel.val);
-
-
-        bool ret = query.exec();
-
-        return ret;
-
-    }
-
-    return false;
-
-}
-
 LearnedPlace DatabaseManager::getLearnedPlace(int id)
 {
     LearnedPlace place;
@@ -424,7 +370,7 @@ Place DatabaseManager::getPlace(int id)
         int id = query.value(0).toInt();
 
         // id;
-        qDebug()<<id;
+        qDebug()<<"Retrieved Place "<< id;
         QByteArray array = query.value(1).toByteArray();
         place.meanInvariant = DatabaseManager::byteArray2Mat(array);
         QByteArray array2 = query.value(2).toByteArray();
@@ -433,9 +379,6 @@ Place DatabaseManager::getPlace(int id)
         place.memberInvariants = DatabaseManager::byteArray2Mat(array3);
 
         place.id = id;
-        //  QByteArray array = query.value(0).toByteArray();
-
-        // return byteArray2Mat(array);
     }
     return place;
 }

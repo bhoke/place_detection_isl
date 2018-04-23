@@ -580,12 +580,15 @@ void PlaceDetector::processImage()
                 intensityInvariants.push_back(invariants);
             }
             //bool similar = false;
-            const float normFactor_int = 1e+02f,normFactor_hue = 1e+08f;
+            const float normFactor_int = 1e+08f,normFactor_hue = 1e+08f;
 
             Mat normalizedIntInvariant =  intensityInvariants / normFactor_int;
             Mat normalizedHueInvariant =  hueInvariants / normFactor_hue;
             currentBasePoint.intensityInvariants = normalizedIntInvariant.clone();
             currentBasePoint.hueInvariants = normalizedHueInvariant;
+            if(image_counter == 1)
+            std::cout << normalizedIntInvariant << std::endl;
+//            std::cin.get();
 
             // We don't have a previous base point
             if(previousBasePoint.id == 0)
@@ -603,7 +606,7 @@ void PlaceDetector::processImage()
                            <<" and " << currentBasePoint.id << ": " <<intensityCoh << std::endl;
                  std::cout << "Result of hue coherency function for the " << previousBasePoint.id
                            <<" and " << currentBasePoint.id << ": " <<hueCoh << std::endl;
-                if(intensityCoh <= tau_inv && hueCoh <= tau_inv) //&& result > tau_inv2)
+                if(intensityCoh <= tau_inv && hueCoh <= 50) //&& result > tau_inv2)
                 {
                     ///  dbmanager.insertBasePoint(currentBasePoint);
                     wholebasepoints.push_back(currentBasePoint);
@@ -622,7 +625,7 @@ void PlaceDetector::processImage()
                         {
                             float area = this->tempwin->totalDiff/(tempwin->endPoint - tempwin->startPoint+1);
                             // This is a valid temporal window
-                            if(tempwin->endPoint - tempwin->startPoint >= tau_w && area>= tau_avgdiff)
+                            if(tempwin->endPoint - tempwin->startPoint >= tau_w )//&& area>= tau_avgdiff)
                             {
                                 qDebug()<<"New Place";
                                 currentPlace->calculateMeanInvariant();
