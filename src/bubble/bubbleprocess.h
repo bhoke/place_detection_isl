@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <vector>
 #include <QFile>
-#include <QRgb>
 #include <opencv2/opencv.hpp>
 
 #define RHO_0 1
@@ -12,17 +11,14 @@
 #define HARMONIC2 10
 
 struct bubblePoint{
-
     int panAng;
     int tiltAng;
     double val;
 };
 struct bubbleStatistics
 {
-    // mean of the bubble Surface
-    double mean;
-    // variance of the bubble Surface
-    double variance;
+    double mean;// mean of the bubble Surface
+    double variance;// variance of the bubble Surface
 };
 
 struct DFCoefficients
@@ -33,31 +29,27 @@ struct DFCoefficients
     float d[HARMONIC1][HARMONIC2];
 };
 
-using std::vector;
-
-class bubbleProcess : public QObject
+class bubbleProcess
 {
-    Q_OBJECT
 public:
-
     bubbleProcess();
 
     static DFCoefficients calculateDFCoefficients(const std::vector <bubblePoint>& bubble);
-    static  cv::Mat calculateInvariantsMat(DFCoefficients coeff);
-    static bubbleStatistics calculateBubbleStatistics(const vector<bubblePoint>& bubble);
+    static cv::Mat calculateInvariantsMat(DFCoefficients coeff);
+    static bubbleStatistics calculateBubbleStatistics(const std::vector<bubblePoint>& bubble);
 
     // Reduces the number of points in a bubble by combining points falling in the same patch
-    static vector<bubblePoint> reduceBubble(vector<bubblePoint>bubble);
+    static std::vector<bubblePoint> reduceBubble(std::vector<bubblePoint>bubble);
 
     // Reads the bubble
-    static vector<bubblePoint> readBubble(QFile* file);
-    static vector<bubblePoint> convertGrayImage2Bub(cv::Mat grayImage);
+    static std::vector<bubblePoint> readBubble(QFile* file);
+    static std::vector<bubblePoint> convertGrayImage2Bub(cv::Mat grayImage);
     static void calculateImagePanAngles(int focalLengthPixels,int imageWidth);
     static void calculateImageTiltAngles(int focalLengthPixels,int imageHeight);
 
 private:
 
-    vector< vector<bubblePoint> > bubbles;
+    std::vector< std::vector<bubblePoint> > bubbles;
 };
 
 #endif // BUBBLEPROCESS_H

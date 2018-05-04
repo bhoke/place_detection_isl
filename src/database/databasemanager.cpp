@@ -1,6 +1,5 @@
 #include "databasemanager.h"
 #include "Utility.h"
-//#include <createBDSTISL/src/bdst.h>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
 #include <QVariant>
@@ -10,8 +9,7 @@
 
 static QVector<int> placeLabels;
 
-DatabaseManager::DatabaseManager(QObject *parent) :
-    QObject(parent)
+DatabaseManager::DatabaseManager()
 {
 }
 bool DatabaseManager::openDB(QString filePath, QString connectionName)
@@ -63,8 +61,6 @@ bool DatabaseManager::isOpen()
 void DatabaseManager::closeDB()
 {
     if(db.isOpen()) db.close();
-
-
 }
 
 bool DatabaseManager::deleteDB()
@@ -79,7 +75,6 @@ bool DatabaseManager::deleteDB()
     path = QDir::toNativeSeparators(path);
     return QFile::remove(path);
 #else
-
     // Remove created database binary file
     return QFile::remove("my.bubbledb.sqlite");
 #endif

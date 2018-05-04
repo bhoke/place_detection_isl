@@ -3,7 +3,6 @@
 
 #include "bubbleprocess.h"
 #include <opencv2/opencv.hpp>
-#include <QObject>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
 #include <QFile>
@@ -20,13 +19,10 @@ class BasePoint;
 class LearnedPlace;
 class Level;
 
-class DatabaseManager : public QObject
+class DatabaseManager
 {
-    Q_OBJECT
 public:
-    explicit DatabaseManager(QObject *parent = 0);
-    //  ~DatabaseManager();
-
+    explicit DatabaseManager();
     bool openDB(QString filePath);
 
     // For accessing multiple databases
@@ -73,11 +69,11 @@ public:
 private:
     QSqlDatabase db;
 
-    
+
 signals:
-    
+
 public slots:
-    
+
 };
 
 #endif // DATABASEMANAGER_H

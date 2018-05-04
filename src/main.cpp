@@ -51,7 +51,6 @@ bool createDirectories(QString previousMemoryPath)
     mainDirectoryPath = dir.path();
     qDebug()<<"Main Directory Path"<<mainDirectoryPath;
 
-
     QDir mainDir(QDir::homePath().append("/").append(mainDirectoryName));
 
     QString imageDirectory = "images";
@@ -64,24 +63,18 @@ bool createDirectories(QString previousMemoryPath)
 
     qDebug()<<"Image directory path"<<imagesPath;
 
-    QString databasepath = QDir::homePath();
+    QString databasepath = QDir::homePath() + "/emptydb";
+    QString detectedPlacesdbpath = databasepath + "/detected_places.db";
 
-    databasepath.append("/emptydb");
-
-    QString detecplacesdbpath = databasepath;
-    detecplacesdbpath.append("/detected_places.db");
-
-    QFile file(detecplacesdbpath);
+    QFile file(detectedPlacesdbpath);
 
     if(file.exists())
     {
-        QString newdir = mainDirectoryPath;
-        newdir.append("/detected_places.db");
-        QFile::copy(detecplacesdbpath,newdir);
+        QString newdir = mainDirectoryPath + "/detected_places.db";
+        QFile::copy(detectedPlacesdbpath,newdir);
 
         if(!dbmanager.openDB(newdir))
             return false;
-        //   file.close();
     }
     else
         return false;
@@ -181,26 +174,13 @@ void startStopCallback(const std_msgs::Int16 startstopSignal)
         {
             firsttime = false;
 
-            bool canCreateDir = false;
-
-            if(!detector.usePreviousMemory)
-            {
-                canCreateDir = createDirectories("");
-            }
-            else
-            {
-                canCreateDir = createDirectories(QString::fromStdString(detector.previousMemoryPath));
-            }
-
-            if(canCreateDir)
+            if(createDirectories(QString::fromStdString(detector.previousMemoryPath)))
             {
                 qDebug()<<"Directories have been created successfully!!";
 
                 std_msgs::String sstr;
 
                 sstr.data = mainDirectoryPath.toStdString();
-
-                //std::cout<<"Ssstr data: "<<sstr.data<<std::endl;
                 QString rawInvariantsName = mainDirectoryPath;
 
                 rawInvariantsName.append("/Place Indices.txt");
@@ -213,29 +193,18 @@ void startStopCallback(const std_msgs::Int16 startstopSignal)
                 }
 
                 saveParameters(mainDirectoryPath);
-
                 filePathPublisher.publish(sstr);
             }
             else
             {
                 qDebug()<<"Error!! Necessary directories could not be created!! Detector will not work!!";
-
                 detector.shouldProcess = false;
-                //  return -1;
             }
         }
     }
-    // Stop the node
-    else if(startstopSignal.data == -1)
-    {
-        sendLastPlaceandShutdown = true;
 
-    }
-    // Pause the node
-    else if(startstopSignal.data == 0)
-    {
-        detector.shouldProcess = false;
-    }
+    else if(startstopSignal.data == -1) sendLastPlaceandShutdown = true; // Stop the node
+    else if(startstopSignal.data == 0) detector.shouldProcess = false;  // Pause the node
 }
 
 double compareHKCHISQR(Mat input1, Mat input2)
@@ -251,12 +220,9 @@ double compareHKCHISQR(Mat input1, Mat input2)
     {
         float in1 = input1.at<float>(i,0);
         float in2 = input2.at<float>(i,0);
-//            std::cout << "in1 ve in2:  " << in1  << "  "<< in2 << std::endl;
         double mul = (in1-in2)*(in1-in2);
         double ss =  in1+in2;
         summ += mul/ss;
-        // std::cout << "Mul, ss, summ:  " << mul << "  " << ss << "  "  << mul/ss << std::endl;
-        //        qDebug()<< "CHISQR " <<mul<<ss<<summ;
     }
     return summ;
 }
@@ -317,17 +283,12 @@ int main (int argc, char** argv)
 
     qDebug()<<"Saturation and Value thresholds"<<detector.satLower<<detector.valLower<<detector.valUpper<<detector.tau_avgdiff;
 
-    if(detector.debugMode)
-    {
-        qDebug()<<"Debug mode is on!! File Path"<<QString::fromStdString(detector.debugFilePath);
-    }
+    if(detector.debugMode) qDebug()<<"Debug mode is on!! File Path"<<QString::fromStdString(detector.debugFilePath);
 
     pnh.getParam("use_previous_memory",detector.usePreviousMemory);
 
-    if(detector.usePreviousMemory)
-    {
-        pnh.getParam("previous_memory_path", detector.previousMemoryPath);
-    }
+    if(detector.usePreviousMemory) pnh.getParam("previous_memory_path", detector.previousMemoryPath);
+    else detector.previousMemoryPath = "";
 
     bubbleProcess::calculateImagePanAngles(detector.focalLengthPixels,img_width);
     bubbleProcess::calculateImageTiltAngles(detector.focalLengthPixels,img_height);
@@ -351,12 +312,11 @@ int main (int argc, char** argv)
     while(ros::ok())
     {
         ros::spinOnce();
-
         loop.sleep();
 
         if(detector.shouldProcess)
         {
-            if(!detector.debugMode)
+            if(!detector.debugMode) // Live Robot Mode
             {
                 detector.shouldProcess = false;
                 detector.processImage();
@@ -367,9 +327,6 @@ int main (int argc, char** argv)
                     {
 
                         detector.currentPlace->calculateMeanInvariant();
-
-                        // qDebug()<<"Current place mean invariant: "<<currentPlace->meanInvariant.rows<<currentPlace->meanInvariant.cols<<currentPlace->meanInvariant.at<float>(50,0);
-
                         if(detector.currentPlace->memberIds.rows >= detector.tau_p){
 
                             dbmanager.insertPlace(*detector.currentPlace);
@@ -383,7 +340,6 @@ int main (int argc, char** argv)
 
                             ros::spinOnce();
 
-                            // loop.sleep();
                             strim << "Place ID: " << detector.currentPlace->id << "\n";
                             for(MatIterator_<int> it = detector.currentPlace->memberIds.begin<int>();
                                 it != detector.currentPlace->memberIds.end<int>();++it)
@@ -393,15 +349,13 @@ int main (int argc, char** argv)
 
                             detector.placeID++;
                         }
-
                         delete detector.currentPlace;
                         detector.currentPlace = 0;
                     }
-
                     ros::shutdown();
                 }
             }
-            else // Debug Mode
+            else // Debug(Database) Mode
             {
                 QStringList extensions;
                 extensions << "*.jpeg";
@@ -466,7 +420,6 @@ int main (int argc, char** argv)
     } //  while(ros::ok())
 
     rawInvariants.close();
-    // Delete the current place
     if(detector.currentPlace)
     {
         delete detector.currentPlace;
@@ -506,9 +459,7 @@ void PlaceDetector::processImage()
         currentBasePoint.avgVal = statsVal.mean;
         currentBasePoint.varVal = statsVal.variance;
         currentBasePoint.id = image_counter;
-        QString imagefilePath = imagesPath;
-        imagefilePath.append("/rgb_");
-        imagefilePath.append(QString::number(image_counter)).append(".jpg");
+        QString imagefilePath = imagesPath + "/rgb_" + QString::number(image_counter) + ".jpg";
         imwrite(imagefilePath.toStdString().data(),currentImage);
         currentBasePoint.status = 0;
         //qDebug() << "Current Mean: " << statsVal.mean << "and" << statsVal.variance ;
@@ -584,9 +535,6 @@ void PlaceDetector::processImage()
             Mat normalizedHueInvariant =  hueInvariants / normFactor_hue;
             currentBasePoint.intensityInvariants = normalizedIntInvariant.clone();
             currentBasePoint.hueInvariants = normalizedHueInvariant;
-            if(image_counter == 1)
-            std::cout << normalizedIntInvariant << std::endl;
-//            std::cin.get();
 
             // We don't have a previous base point
             if(previousBasePoint.id == 0)

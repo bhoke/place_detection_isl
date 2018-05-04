@@ -4,14 +4,14 @@
 #include <math.h>
 #include <QDebug>
 
-static vector<int> imagePanAngles;
-static vector<int> imageTiltAngles;
+static std::vector<int> imagePanAngles;
+static std::vector<int> imageTiltAngles;
 
 bubbleProcess::bubbleProcess()
 {
 }
 
-bubbleStatistics bubbleProcess::calculateBubbleStatistics(const vector<bubblePoint>& bubble)
+bubbleStatistics bubbleProcess::calculateBubbleStatistics(const std::vector<bubblePoint>& bubble)
 {
   bubbleStatistics result;
   std::vector<float> values(bubble.size());
@@ -88,7 +88,7 @@ std::vector<bubblePoint> bubbleProcess::readBubble(QFile *file){
 
   QTextStream stream(file);
 
-  vector<bubblePoint> result;
+  std::vector<bubblePoint> result;
 
   if(!file->isOpen()) return result;
 
@@ -119,7 +119,7 @@ std::vector<bubblePoint> bubbleProcess::readBubble(QFile *file){
 
 std::vector<bubblePoint> bubbleProcess::reduceBubble(std::vector<bubblePoint> bubble)
 {
-  vector<bubblePoint> result;
+  std::vector<bubblePoint> result;
 
   double vals[360][360];
   double counts[360][360];
