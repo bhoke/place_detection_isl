@@ -28,14 +28,19 @@ SET(bubble_space_SOURCES
   src/bubble/bubbleprocess.cpp
   src/database/databasemanager.cpp
   src/imageprocess/imageprocess.cpp
-  src/Utility.cpp
+  src/Utility/BasePoint.cpp
+  src/Utility/Place.cpp
+  src/Utility/TemporalWindow.cpp
 )
 
 SET(bubble_space_HEADERS
   src/bubble/bubbleprocess.h
   src/database/databasemanager.h
   src/imageprocess/imageprocess.h
-  src/Utility.h
+  src/Utility/BasePoint.h
+  src/Utility/Place.h
+  src/Utility/TemporalWindow.h
+  src/Utility/PlaceDetector.h
 )
 
 ADD_LIBRARY(${PROJECT_NAME} src/main.cpp)

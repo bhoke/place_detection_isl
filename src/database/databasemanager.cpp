@@ -1,5 +1,6 @@
 #include "databasemanager.h"
-#include "Utility.h"
+#include "../Utility/Place.h"
+#include "../Utility/TemporalWindow.h"
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
 #include <QVariant>
@@ -326,7 +327,7 @@ cv::Mat DatabaseManager::getPlaceMeanInvariant(int id)
     else
     {
         qDebug() << "Database is not open, Ctrl+C to terminate";
-        return Mat();
+        return cv::Mat();
     }
 
 }
@@ -345,7 +346,7 @@ cv::Mat DatabaseManager::getPlaceMemberIds(int id)
     else
     {
         qDebug() << "Database is not open, Ctrl+C to terminate";
-        return Mat();
+        return cv::Mat();
     }
 }
 Place DatabaseManager::getPlace(int id)
