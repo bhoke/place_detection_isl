@@ -9,3 +9,11 @@ TemporalWindow::TemporalWindow()
     id = -1;
     totalDiff = 0.0;
 }
+
+bool TemporalWindow::checkExtensionStatus(uint currentID)
+{
+    if(currentID - this->endPoint <= tau_n)
+        return true;
+
+    return false;
+}
