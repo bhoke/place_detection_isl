@@ -434,11 +434,3 @@ int main (int argc, char** argv)
 
     return 0;
 } // End of main()
-
-bool TemporalWindow::checkExtensionStatus(uint currentID)
-{
-    if(currentID - this->endPoint <= tau_n)
-        return true;
-
-    return false;
-}
