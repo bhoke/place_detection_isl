@@ -31,6 +31,7 @@ SET(bubble_space_SOURCES
   src/Utility/BasePoint.cpp
   src/Utility/Place.cpp
   src/Utility/TemporalWindow.cpp
+    src/Utility/PlaceDetector.cpp
 )
 
 SET(bubble_space_HEADERS

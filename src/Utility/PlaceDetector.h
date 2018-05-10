@@ -9,7 +9,7 @@ class PlaceDetector
 public:
 
     PlaceDetector();
-    PlaceDetector(int tau_w, int tau_n, int tau_p);
+    //PlaceDetector(int tau_w, int tau_n, int tau_p);
     void processImage();
 
     bool shouldProcess;
