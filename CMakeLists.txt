@@ -1,8 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
-SET(CMAKE_CXX_STANDARD 11)
-
 PROJECT(place_detection_isl)
-
+#SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 FIND_PACKAGE(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
@@ -57,7 +56,7 @@ ADD_LIBRARY(${PROJECT_NAME} src/main.cpp)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
  opencv_core
- opencv_imgcodecs
+ #opencv_imgcodecs
  opencv_imgproc
  opencv_highgui
  ${catkin_LIBRARIES}
@@ -69,6 +68,5 @@ ADD_EXECUTABLE(place_detection_node
 )
 TARGET_LINK_LIBRARIES(place_detection_node
  ${PROJECT_NAME}
- Qt5::Core
- Qt5::Sql
+ ${QT_LIBS}
 )
