@@ -1,5 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 SET(CMAKE_CXX_STANDARD 11)
+
 PROJECT(place_detection_isl)
 
 FIND_PACKAGE(catkin REQUIRED COMPONENTS
@@ -9,8 +10,16 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
-FIND_PACKAGE(Qt5Core)
-FIND_PACKAGE(Qt5Sql)
+FIND_PACKAGE(Qt5 COMPONENTS Core Sql)
+IF(Qt5_FOUND)
+INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS})
+SET(QT_LIBS Qt5::Core Qt5::Sql)
+ELSE()
+FIND_PACKAGE(Qt4 REQUIRED QtCore QtSql)
+INCLUDE(${QT_USE_FILE})
+ADD_DEFINITIONS( ${QT_DEFINITIONS} )
+SET(QT_LIBS Qt4::QtCore Qt4::QtSql)
+ENDIF()
 FIND_PACKAGE(OpenCV REQUIRED)
 
 CATKIN_PACKAGE()
@@ -31,7 +40,7 @@ SET(bubble_space_SOURCES
   src/Utility/BasePoint.cpp
   src/Utility/Place.cpp
   src/Utility/TemporalWindow.cpp
-    src/Utility/PlaceDetector.cpp
+  src/Utility/PlaceDetector.cpp
 )
 
 SET(bubble_space_HEADERS
@@ -45,6 +54,21 @@ SET(bubble_space_HEADERS
 )
 
 ADD_LIBRARY(${PROJECT_NAME} src/main.cpp)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui ${catkin_LIBRARIES})
-ADD_EXECUTABLE(place_detection_node src/main.cpp ${bubble_space_SOURCES} ${bubble_space_HEADERS})
-TARGET_LINK_LIBRARIES(place_detection_node ${PROJECT_NAME} Qt5::Core Qt5::Sql)
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+ opencv_core
+ opencv_imgcodecs
+ opencv_imgproc
+ opencv_highgui
+ ${catkin_LIBRARIES}
+)
+ADD_EXECUTABLE(place_detection_node
+ src/main.cpp
+ ${bubble_space_SOURCES}
+ ${bubble_space_HEADERS}
+)
+TARGET_LINK_LIBRARIES(place_detection_node
+ ${PROJECT_NAME}
+ Qt5::Core
+ Qt5::Sql
+)

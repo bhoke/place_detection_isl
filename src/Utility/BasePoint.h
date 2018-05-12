@@ -1,7 +1,7 @@
 #ifndef BASEPOINT_H
 #define BASEPOINT_H
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 
 // STATUS OF BASEPOINT
 // 0: normal
