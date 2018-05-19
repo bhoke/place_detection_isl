@@ -9,32 +9,25 @@ Place::Place()
 Place::Place(int id)
 {
     this->id = id;
-    this->memberIds = cv::Mat::zeros(1,1,CV_16UC1);
 }
 
 void Place::calculateMeanInvariant()
 {
     cv::Mat wholeInvariants;
 
-    for(size_t i = 0; i < this->members.size(); i++)
+    for(size_t i = 0; i < this->memberBPs.size(); i++)
     {
         if(i == 0)
-        {
-            wholeInvariants = members[i].intensityInvariants;
-        }
+            wholeInvariants = this->memberBPs[i].intensityInvariants;
         else
-        {
-            cv::hconcat(wholeInvariants,members[i].intensityInvariants,wholeInvariants);
-        }
+            cv::hconcat(wholeInvariants,this->memberBPs[i].intensityInvariants,wholeInvariants);
     }
 
     this->memberInvariants = wholeInvariants.clone();
     cv::reduce(wholeInvariants,this->meanInvariant,1,CV_REDUCE_AVG);
-    this->memberIds = cv::Mat::zeros(this->members.size(),1,CV_32SC1);
-
-    for(size_t i = 0; i < this->members.size(); i++)
-        this->memberIds.at<unsigned short>(i,0) = this->members[i].id;
 }
+
+/************************************** LEARNED PLACE **********************************/
 
 LearnedPlace::LearnedPlace()
 {
@@ -44,7 +37,6 @@ LearnedPlace::LearnedPlace()
 LearnedPlace::LearnedPlace(int id)
 {
     this->id = id;
-    this->memberIds = cv::Mat::zeros(1,1,CV_16UC1);
 }
 
 LearnedPlace::LearnedPlace (Place place)
@@ -52,18 +44,30 @@ LearnedPlace::LearnedPlace (Place place)
     this->id = LearnedPlace::lpCounter;
     this->meanInvariant = place.meanInvariant;
     this->memberInvariants = place.memberInvariants;
-    this-> memberIds = place.memberIds;
-
-    if(this->memberPlaces.empty())
-    {
-        this->memberPlaces = cv::Mat(1,1,CV_16UC1);
-        this->memberPlaces.at<unsigned short>(0,0) = (unsigned short)place.id;
-    }
+    this-> memberBPIDs = place.memberBPIDs;
 
     lpCounter++;
 }
 
 void LearnedPlace::calculateMeanInvariant()
+{
+    cv::reduce(this->memberInvariants,this->meanInvariant,1,CV_REDUCE_AVG);
+}
+
+
+/*************************************** SUBPLACE ********************************/
+
+subPlace::subPlace()
+{
+    this->id = -1;
+}
+
+subPlace::subPlace(int id)
+{
+    this->id = id;
+}
+
+void subPlace::calculateMeanInvariant()
 {
     cv::reduce(this->memberInvariants,this->meanInvariant,1,CV_REDUCE_AVG);
 }

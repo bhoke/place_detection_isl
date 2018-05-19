@@ -87,13 +87,8 @@ bool createDirectories(QString previousMemoryPath)
     QString knowledgedbpath = databasepath + "/knowledge.db";
     QFile file2(knowledgedbpath);
 
-    if(file2.exists())
-    {
-      QString newdir = mainDirectoryPath;
-      QFile::copy(knowledgedbpath,newdir.append("/knowledge.db"));
-    }
-    else
-    return false;
+    if(file2.exists()) QFile::copy(knowledgedbpath, mainDirectoryPath + "/knowledge.db");
+    else return false;
   }
   // If we have supplied a previous memory path, then open that db
   else
@@ -101,13 +96,8 @@ bool createDirectories(QString previousMemoryPath)
     QString knowledgedbpath = previousMemoryPath + "/knowledge.db";
     QFile file2(knowledgedbpath);
 
-    if(file2.exists())
-    {
-      QString newdir = mainDirectoryPath;
-      QFile::copy(knowledgedbpath,newdir.append("/knowledge.db"));
-    }
-    else
-    return false;
+    if(file2.exists())  QFile::copy(knowledgedbpath,mainDirectoryPath + "/knowledge.db");
+    else return false;
   }
 
   return true;
@@ -318,11 +308,11 @@ int main (int argc, char** argv)
 
         if(sendLastPlaceandShutdown)
         {
-          if(detector.currentPlace && detector.currentPlace->id > 0 && detector.currentPlace->members.size() > 0)
+          if(detector.currentPlace && detector.currentPlace->id > 0 && detector.currentPlace->memberBPs.size() > 0)
           {
 
             detector.currentPlace->calculateMeanInvariant();
-            if(detector.currentPlace->memberIds.rows >= detector.tau_p){
+            if(detector.currentPlace->memberBPs.size() >= detector.tau_p){
 
               dbmanager.insertPlace(*detector.currentPlace);
 
@@ -334,13 +324,6 @@ int main (int argc, char** argv)
               placedetectionPublisher.publish(plID);
 
               ros::spinOnce();
-
-              strim << "Place ID: " << detector.currentPlace->id << "\n";
-              for(MatIterator_<int> it = detector.currentPlace->memberIds.begin<int>();
-              it != detector.currentPlace->memberIds.end<int>();++it)
-              {
-                strim << *it << "\n";
-              }
 
               detector.placeID++;
             }
@@ -376,24 +359,17 @@ int main (int argc, char** argv)
           break;
         }
 
-        if(detector.currentPlace && detector.currentPlace->id > 0 && detector.currentPlace->members.size() > 0)
+        if(detector.currentPlace && detector.currentPlace->id > 0 && detector.currentPlace->memberBPIDs.size() > 0)
         {
           qDebug()<<"Evaluate last place and shutdown";
 
           detector.currentPlace->calculateMeanInvariant();
 
-          if(detector.currentPlace->memberIds.rows >= detector.tau_p)
+          if(detector.currentPlace->memberBPs.size() >= detector.tau_p)
           {
             dbmanager.insertPlace(*detector.currentPlace);
 
             detector.detectedPlaces.push_back(*detector.currentPlace);
-
-            strim << "Place ID: " << detector.currentPlace->id << "\n";
-            for(MatIterator_<int> it = (detector.currentPlace)->memberIds.begin<int>();
-            it != (detector.currentPlace)->memberIds.end<int>();++it)
-            {
-              strim << *it << "\n";
-            }
 
             std_msgs::Int16 plID;
             plID.data = detector.placeID;
@@ -449,8 +425,8 @@ void PlaceDetector::processImage()
     currentBasePoint.avgVal = statsVal.mean;
     currentBasePoint.varVal = statsVal.variance;
     currentBasePoint.id = image_counter;
-    QString imagefilePath = imagesPath + "/rgb_" + QString::number(image_counter) + ".jpg";
-    imwrite(imagefilePath.toStdString().data(),currentImage);
+    //QString imagefilePath = imagesPath + "/rgb_" + QString::number(image_counter) + ".jpg";
+    //imwrite(imagefilePath.toStdString().data(),currentImage);
     currentBasePoint.status = 0;
     //qDebug() << "Current Mean: " << statsVal.mean << "and" << statsVal.variance ;
     /*********************** WE CHECK FOR THE UNINFORMATIVENESS OF THE FRAME   *************************/
@@ -530,7 +506,7 @@ void PlaceDetector::processImage()
       if(previousBasePoint.id == 0)
       {
         previousBasePoint = currentBasePoint;
-        currentPlace->members.push_back(currentBasePoint);
+        currentPlace->memberBPs.push_back(currentBasePoint);
         wholebasepoints.push_back(currentBasePoint);
       }
       else
@@ -568,18 +544,12 @@ void PlaceDetector::processImage()
 
                 //qDebug()<<"Current place mean invariant: "<<currentPlace->meanInvariant.rows<<currentPlace->meanInvariant.cols<<currentPlace->meanInvariant.at<float>(50,0);
 
-                if(currentPlace->memberIds.rows >= tau_p){
+                if(currentPlace->memberBPs.size() >= tau_p){
 
                   dbmanager.insertPlace(*currentPlace);
 
                   std_msgs::Int16 plID;
                   plID.data = this->placeID;
-
-                  strim << "Place ID: " << currentPlace->id << "\n";
-                  for(MatIterator_<int> it = currentPlace->memberIds.begin<int>(); it != currentPlace->memberIds.end<int>();++it)
-                  {
-                    strim << *it << "\n";
-                  }
 
                   placedetectionPublisher.publish(plID);
 
@@ -594,7 +564,7 @@ void PlaceDetector::processImage()
                 currentPlace = new Place(this->placeID);
                 basepointReservoir.push_back(currentBasePoint);
 
-                currentPlace->members = basepointReservoir;
+                currentPlace->memberBPs = basepointReservoir;
                 basepointReservoir.clear();
 
                 dbmanager.insertTemporalWindow(*tempwin);
@@ -614,11 +584,11 @@ void PlaceDetector::processImage()
                 tempwin = 0;
 
                 std::vector<BasePoint> AB;
-                AB.reserve( currentPlace->members.size() + basepointReservoir.size() ); // preallocate memory
-                AB.insert( AB.end(), currentPlace->members.begin(), currentPlace->members.end() );
+                AB.reserve( currentPlace->memberBPs.size() + basepointReservoir.size() ); // preallocate memory
+                AB.insert( AB.end(), currentPlace->memberBPs.begin(), currentPlace->memberBPs.end() );
                 AB.insert( AB.end(), basepointReservoir.begin(), basepointReservoir.end() );
-                currentPlace->members.clear();
-                currentPlace->members = AB;
+                currentPlace->memberBPs.clear();
+                currentPlace->memberBPs = AB;
                 //qDebug()<< "Adding basepoint "<< AB.back().id << "to place" << currentPlace->id;
 
                 basepointReservoir.clear();
@@ -627,7 +597,7 @@ void PlaceDetector::processImage()
           }
           else
           {
-            currentPlace->members.push_back(currentBasePoint);
+            currentPlace->memberBPs.push_back(currentBasePoint);
             //qDebug()<< "Adding basepoint "<< currentBasePoint.id << "to place" << currentPlace->id;
           }
         } // COHERENT
@@ -686,7 +656,7 @@ void PlaceDetector::processImage()
 
                 //qDebug()<<"Current place mean invariant: "<<currentPlace->meanInvariant.rows<<currentPlace->meanInvariant.cols;
 
-                if(currentPlace->memberIds.rows >= tau_p)
+                if(currentPlace->memberBPs.size() >= tau_p)
                 {
                   qDebug()<<"New Place";
                   dbmanager.insertPlace(*currentPlace);
@@ -698,12 +668,6 @@ void PlaceDetector::processImage()
 
                   //qDebug() << "**********"<<currentPlace->id << "\t" <<beginMember << "-" << endMember << "\n";
 
-                  strim << "Place ID: " << currentPlace->id << "\n";
-
-                  for(MatIterator_<int> it = currentPlace->memberIds.begin<int>(); it != currentPlace->memberIds.end<int>();++it)
-                  {
-                    strim << *it << "\n";
-                  }
                   this->detectedPlaces.push_back(*currentPlace);
 
                   this->placeID++;
@@ -712,7 +676,7 @@ void PlaceDetector::processImage()
 
                 currentPlace = new Place(this->placeID);
 
-                currentPlace->members = basepointReservoir;
+                currentPlace->memberBPs = basepointReservoir;
                 basepointReservoir.clear();
 
                 dbmanager.insertTemporalWindow(*tempwin);
@@ -732,11 +696,11 @@ void PlaceDetector::processImage()
                 tempwin = 0;
 
                 std::vector<BasePoint> AB;
-                AB.reserve( currentPlace->members.size() + basepointReservoir.size()); // preallocate memory
-                AB.insert( AB.end(), currentPlace->members.begin(), currentPlace->members.end() );
+                AB.reserve( currentPlace->memberBPs.size() + basepointReservoir.size()); // preallocate memory
+                AB.insert( AB.end(), currentPlace->memberBPs.begin(), currentPlace->memberBPs.end() );
                 AB.insert( AB.end(), basepointReservoir.begin(), basepointReservoir.end() );
-                currentPlace->members.clear();
-                currentPlace->members = AB;
+                currentPlace->memberBPs.clear();
+                currentPlace->memberBPs = AB;
                 basepointReservoir.clear();
               }
 

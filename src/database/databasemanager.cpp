@@ -177,16 +177,12 @@ bool DatabaseManager::insertTemporalWindow(const TemporalWindow &twindow)
         query.addBindValue(twindow.startPoint);
         query.addBindValue(twindow.endPoint);
 
-
-
         bool ret = query.exec();
 
         return ret;
-
     }
 
     return false;
-
 }
 
 int DatabaseManager::getLearnedPlaceMaxID()
@@ -194,10 +190,6 @@ int DatabaseManager::getLearnedPlaceMaxID()
     if(db.isOpen())
     {
         QSqlQuery query(QString("select MAX(id) from learnedplace"),QSqlDatabase::database("knowledge"));
-
-        // query.prepare();
-
-        // query.exec();
 
         query.next();
 
@@ -212,10 +204,7 @@ int DatabaseManager::getLearnedPlaceMaxID()
 
 bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
 {
-
-    QByteArray arr= mat2ByteArray(learnedplace.memberPlaces);
-
-    QByteArray arr2 = mat2ByteArray(learnedplace.memberIds);
+    QByteArray arr2 = mat2ByteArray(cv::Mat(learnedplace.memberBPIDs));
 
     QByteArray arr3 = mat2ByteArray(learnedplace.meanInvariant);
 
@@ -230,7 +219,6 @@ bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
         query.prepare(QString("replace into learnedplace values(?, ?, ?, ?, ?)"));
 
         query.addBindValue(learnedplace.id);
-        query.addBindValue(arr);
         query.addBindValue(arr2);
         query.addBindValue(arr3);
         query.addBindValue(arr4);
@@ -256,39 +244,25 @@ LearnedPlace DatabaseManager::getLearnedPlace(int id)
 
         int id = query.value(0).toInt();
 
-        // id;
-        //qDebug()<<"Learned Place id"<<id;
-        QByteArray array = query.value(1).toByteArray();
-        place.memberPlaces = DatabaseManager::byteArray2Mat(array);
+        QByteArray array2 = query.value(1).toByteArray();
+        place.memberBPIDs = DatabaseManager::byteArray2Mat(array2);
 
-        QByteArray array2 = query.value(2).toByteArray();
-        place.memberIds = DatabaseManager::byteArray2Mat(array2);
-
-        QByteArray array3 = query.value(3).toByteArray();
+        QByteArray array3 = query.value(2).toByteArray();
         place.meanInvariant = DatabaseManager::byteArray2Mat(array3);
 
-        QByteArray array4 = query.value(4).toByteArray();
+        QByteArray array4 = query.value(3).toByteArray();
         place.memberInvariants = DatabaseManager::byteArray2Mat(array4);
 
-        //qDebug()<<meanInv.rows<<members.rows;
-
         place.id = id;
-
-        //  QByteArray array = query.value(0).toByteArray();
-
-        // return byteArray2Mat(array);
     }
-
-
     return place;
-
 }
 
 bool DatabaseManager::insertPlace(const Place &place)
 {
     QByteArray arr = mat2ByteArray(place.meanInvariant);
 
-    QByteArray arr2 = mat2ByteArray(place.memberIds);
+    QByteArray arr2 = mat2ByteArray(cv::Mat(place.memberBPIDs));
 
     QByteArray arr3 = mat2ByteArray(place.memberInvariants);
 
@@ -366,7 +340,7 @@ Place DatabaseManager::getPlace(int id)
         QByteArray array = query.value(1).toByteArray();
         place.meanInvariant = DatabaseManager::byteArray2Mat(array);
         QByteArray array2 = query.value(2).toByteArray();
-        place.memberIds = DatabaseManager::byteArray2Mat(array2);
+        place.memberBPIDs = DatabaseManager::byteArray2Mat(array2);
         QByteArray array3 = query.value(3).toByteArray();
         place.memberInvariants = DatabaseManager::byteArray2Mat(array3);
 
