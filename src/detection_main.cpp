@@ -359,7 +359,7 @@ int main (int argc, char** argv)
           break;
         }
 
-        if(detector.currentPlace && detector.currentPlace->id > 0 && detector.currentPlace->memberBPIDs.size() > 0)
+        if(detector.currentPlace && detector.currentPlace->id > 0 && detector.currentPlace->memberBPs.size() > 0)
         {
           qDebug()<<"Evaluate last place and shutdown";
 

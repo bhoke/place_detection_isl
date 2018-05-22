@@ -52,7 +52,7 @@ SET(bubble_space_HEADERS
   src/Utility/PlaceDetector.h
 )
 
-ADD_LIBRARY(${PROJECT_NAME} src/main.cpp)
+ADD_LIBRARY(${PROJECT_NAME} src/detection_main.cpp)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
  opencv_core
@@ -62,7 +62,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
  ${catkin_LIBRARIES}
 )
 ADD_EXECUTABLE(place_detection_node
- src/main.cpp
+ src/detection_main.cpp
  ${bubble_space_SOURCES}
  ${bubble_space_HEADERS}
 )
