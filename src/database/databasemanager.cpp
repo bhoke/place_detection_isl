@@ -204,6 +204,7 @@ int DatabaseManager::getLearnedPlaceMaxID()
 
 bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
 {
+
     QByteArray arr2 = mat2ByteArray(cv::Mat(learnedplace.memberBPIDs));
 
     QByteArray arr3 = mat2ByteArray(learnedplace.meanInvariant);
@@ -216,19 +217,21 @@ bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
 
         QSqlQuery query(QSqlDatabase::database("knowledge"));
 
-        query.prepare(QString("replace into learnedplace values(?, ?, ?, ?, ?)"));
+        query.prepare("REPLACE INTO learnedplace(id, memberPlaces, memberIds, meanInvariant, memberInvariants)"
+        "VALUES(?, ?, ?, ?, ?)");
 
+        query.addBindValue(QVariant(QVariant::String));
         query.addBindValue(learnedplace.id);
         query.addBindValue(arr2);
         query.addBindValue(arr3);
         query.addBindValue(arr4);
 
         bool ret = query.exec();
-
+        if(!ret)
+          std::cout << "Warning: LearnedPlace object could not be written to database!" << std::endl;
         return ret;
-
     }
-
+    std::cout << "Warning: LearnedPlace object could not be written to database!" << std::endl;
     return false;
 
 }
@@ -335,8 +338,6 @@ Place DatabaseManager::getPlace(int id)
 
         int id = query.value(0).toInt();
 
-        // id;
-        qDebug()<<"Retrieved Place "<< id;
         QByteArray array = query.value(1).toByteArray();
         place.meanInvariant = DatabaseManager::byteArray2Mat(array);
         QByteArray array2 = query.value(2).toByteArray();
