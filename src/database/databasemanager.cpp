@@ -53,12 +53,13 @@ QSqlError DatabaseManager::lastError()
     // If opening database has failed user can ask
     // error description by QSqlError::text()
     return db.lastError();
-
 }
+
 bool DatabaseManager::isOpen()
 {
     return db.isOpen();
 }
+
 void DatabaseManager::closeDB()
 {
     if(db.isOpen()) db.close();
@@ -79,11 +80,11 @@ bool DatabaseManager::deleteDB()
     // Remove created database binary file
     return QFile::remove("my.bubbledb.sqlite");
 #endif
-
 }
+
 std::vector<bubblePoint> DatabaseManager::readBubble(int type, int number)
 {
-    QSqlQuery query(QString("select * from bubble where type = %1 and number = %2").arg(type).arg(number));
+    QSqlQuery query(QString("SELECT * FROM bubble WHERE type = %1 AND number = %2").arg(type).arg(number));
 
     std::vector<bubblePoint> bubble;
 
@@ -113,7 +114,7 @@ bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints)
     {
         QSqlQuery query;
 
-        query.prepare(QString("replace into basepoint values(?, ?, ?, ?, ?, ?, ?)"));
+        query.prepare(QString("REPLACE INTO basepoint" "VALUES(?, ?, ?, ?, ?, ?, ?)"));
 
         QVariantList ids;
         QVariantList avgVals;
@@ -135,8 +136,6 @@ bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints)
             varLass<<basepoints[i].varLas;
             arrs<<arr;
             statuses<<basepoints[i].status;
-            if(i > 379  && i < 390)
-                qDebug() << qPrintable(arr);
         }
 
         query.addBindValue(ids);
@@ -171,7 +170,7 @@ bool DatabaseManager::insertTemporalWindow(const TemporalWindow &twindow)
     {
         QSqlQuery query;
 
-        query.prepare(QString("replace into temporalwindow values(?, ?, ?)"));
+        query.prepare(QString("REPLACE INTO temporalwindow" "VALUES(?, ?, ?)"));
 
         query.addBindValue(twindow.id);
         query.addBindValue(twindow.startPoint);
@@ -189,7 +188,7 @@ int DatabaseManager::getLearnedPlaceMaxID()
 {
     if(db.isOpen())
     {
-        QSqlQuery query(QString("select MAX(id) from learnedplace"),QSqlDatabase::database("knowledge"));
+        QSqlQuery query(QString("SELECT MAX(id) FROM learnedplace"),QSqlDatabase::database("knowledge"));
 
         query.next();
 
@@ -241,7 +240,7 @@ LearnedPlace DatabaseManager::getLearnedPlace(int id)
 
     if(db.isOpen())
     {
-        QSqlQuery query(QString("select* from learnedplace where id = %1").arg(id), QSqlDatabase::database("knowledge"));
+        QSqlQuery query(QString("SELECT* FROM learnedplace WHERE id = %1").arg(id), QSqlDatabase::database("knowledge"));
 
         query.next();
 
@@ -273,7 +272,7 @@ bool DatabaseManager::insertPlace(const Place &place)
     {
         QSqlQuery query;
 
-        query.prepare(QString("replace into place values(?, ?, ?, ?)"));
+        query.prepare(QString("REPLACE INTO place" "VALUES(?, ?, ?, ?)"));
 
         query.addBindValue(place.id);
         query.addBindValue(arr);
@@ -292,7 +291,7 @@ cv::Mat DatabaseManager::getPlaceMeanInvariant(int id)
 {
     if(db.isOpen())
     {
-        QSqlQuery query(QString("select meaninvariant from place where id = %1").arg(id));
+        QSqlQuery query(QString("SELECT meaninvariant FROM place WHERE id = %1").arg(id));
 
         query.next();
 
@@ -312,7 +311,7 @@ cv::Mat DatabaseManager::getPlaceMemberIds(int id)
 {
     if(db.isOpen())
     {
-        QSqlQuery query(QString("select memberIds from place where id = %1").arg(id));
+        QSqlQuery query(QString("SELECT memberIds FROM place WHERE id = %1").arg(id));
 
         query.next();
 
@@ -332,7 +331,7 @@ Place DatabaseManager::getPlace(int id)
 
     if(db.isOpen())
     {
-        QSqlQuery query(QString("select* from place where id = %1").arg(id));
+        QSqlQuery query(QString("SELECT* FROM place WHERE id = %1").arg(id));
 
         query.next();
 

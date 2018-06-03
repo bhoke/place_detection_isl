@@ -17,5 +17,4 @@ public:
     float totalDiff;
 };
 
-
 #endif
