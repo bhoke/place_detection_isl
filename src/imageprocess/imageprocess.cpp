@@ -6,8 +6,8 @@
 #include <QStringList>
 #include <QDateTime>
 
-Mat filter;
-static std::vector<Mat> filters;
+cv::Mat filter;
+static std::vector<cv::Mat> filters;
 
 ImageProcess::ImageProcess()
 {
@@ -33,7 +33,7 @@ void ImageProcess::readFilters(QString folderName, std::vector<int> filterIds)
 
         QTextStream stream(&file);
         int numElems = 0;
-        Mat_<float> filterOrg;
+        cv::Mat_<float> filterOrg;
         QString line = stream.readLine();
         while(line != NULL)
         {
@@ -58,15 +58,15 @@ void ImageProcess::readFilters(QString folderName, std::vector<int> filterIds)
     }
 }
 
-std::vector<Mat> ImageProcess::applyFilters(Mat singleChannelImage)
+std::vector<cv::Mat> ImageProcess::applyFilters(cv::Mat singleChannelImage)
 {
-    std::vector<Mat> results;
+    std::vector<cv::Mat> results;
     //Reconsturct: 8-bit gray image is converted to 32-bit float in order to get rid of overflow after filtering
     singleChannelImage.convertTo(singleChannelImage,CV_32F);
     for(uint i = 0 ; i < filters.size(); i++)
     {
-        Mat copyImage = singleChannelImage.clone();
-        Mat result;
+        cv::Mat copyImage = singleChannelImage.clone();
+        cv::Mat result;
         //  Mat blurred;
         //  cv::medianBlur(copyImage,blurred,3);
         cv::filter2D(copyImage,result,CV_32F,filters[i]);
@@ -103,9 +103,9 @@ void ImageProcess::scaleResponse(cv::Mat &response)
     response /= (maxResponse - minResponse);
 }
 
-void ImageProcess::generateChannelImage(const Mat& rgbimage, int satLower, int valLower, int valUpper,cv::Mat &hueChannel,cv::Mat &valChannel)
+void ImageProcess::generateChannelImage(const cv::Mat& rgbimage, int satLower, int valLower, int valUpper,cv::Mat &hueChannel,cv::Mat &valChannel)
 {
-    Mat hsvImage;
+    cv::Mat hsvImage;
     cv::cvtColor(rgbimage,hsvImage,CV_BGR2HSV);
     cv::Mat satChannel;
     int nRows = hsvImage.rows;
@@ -113,7 +113,7 @@ void ImageProcess::generateChannelImage(const Mat& rgbimage, int satLower, int v
     //channels[0] hue
     //channel[1] saturation
     //channel[2] value
-    std::vector<Mat> channels;
+    std::vector<cv::Mat> channels;
     cv::split(hsvImage,channels);
     hueChannel = channels[0];
     satChannel = channels[1];

@@ -143,7 +143,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& original_image)
 {
   if(detector.shouldProcess)
   {
-    Mat imm = cv_bridge::toCvCopy(original_image, enc::BGR8)->image;
+    cv::Mat imm = cv_bridge::toCvCopy(original_image, enc::BGR8)->image;
     cv::Rect rect(0,0,imm.cols,(imm.rows/2));
     detector.currentImage = imm(rect);//cv_bridge::toCvCopy(original_image, enc::BGR8)->image;
   }
@@ -192,7 +192,7 @@ void startStopCallback(const std_msgs::Int16 startstopSignal)
   else if(startstopSignal.data == 0) detector.shouldProcess = false;  // Pause the node
 }
 
-double compareHKCHISQR(Mat input1, Mat input2)
+double compareHKCHISQR(cv::Mat input1, cv::Mat input2)
 {
   if(input1.rows != input2.rows)
   {
@@ -346,7 +346,7 @@ int main (int argc, char** argv)
         for(uint i = 0; i < fileCount; i++)
         {
           QString filePath = path + files.at(i);
-          Mat imm = imread(filePath.toStdString().data(),CV_LOAD_IMAGE_COLOR);
+          cv::Mat imm = cv::imread(filePath.toStdString().data(),CV_LOAD_IMAGE_COLOR);
           //cv::Rect rect(0,0,imm.cols,imm.rows);
           // detector.currentImage = imm(rect);
           detector.currentImage = imm;
@@ -479,7 +479,7 @@ void PlaceDetector::processImage()
       // Intensity Channel Processing
       cv::Mat grayImage;
       cv::cvtColor(currentImage,grayImage,CV_BGR2GRAY);
-      std::vector<Mat> filteredVals = ImageProcess::applyFilters(grayImage);
+      std::vector<cv::Mat> filteredVals = ImageProcess::applyFilters(grayImage);
       size_t invariantSize = filteredVals.size()*HARMONIC1*HARMONIC2;
       cv::Mat intensityInvariants;
       intensityInvariants.reserve(invariantSize);
@@ -491,16 +491,12 @@ void PlaceDetector::processImage()
         imgBubble = bubbleProcess::convertGrayImage2Bub(filteredVals[j]);
         reducedBubble = bubbleProcess::reduceBubble(imgBubble);
         intensityDFC = bubbleProcess::calculateDFCoefficients(reducedBubble);
-        Mat invariants = bubbleProcess::calculateInvariantsMat(intensityDFC);
+        cv::Mat invariants = bubbleProcess::calculateInvariantsMat(intensityDFC);
         intensityInvariants.push_back(invariants);
       }
-      //bool similar = false;
-      const float normFactor_int = 1e+08f,normFactor_hue = 1e+08f;
 
-      Mat normalizedIntInvariant =  intensityInvariants / normFactor_int;
-      Mat normalizedHueInvariant =  hueInvariants / normFactor_hue;
-      currentBasePoint.intensityInvariants = normalizedIntInvariant.clone();
-      currentBasePoint.hueInvariants = normalizedHueInvariant;
+      cv::log(intensityInvariants,currentBasePoint.intensityInvariants);
+      cv::log(hueInvariants,currentBasePoint.hueInvariants);
 
       // We don't have a previous base point
       if(previousBasePoint.id == 0)
@@ -573,7 +569,6 @@ void PlaceDetector::processImage()
                 tempwin = 0;
                 this->twindow_counter++;
                 // A new place will be created. Current place will be published
-
               }
               // This is just a noisy temporal window. We should add the coherent basepoints to the current place
               else
@@ -590,7 +585,6 @@ void PlaceDetector::processImage()
                 currentPlace->memberBPs.clear();
                 currentPlace->memberBPs = AB;
                 //qDebug()<< "Adding basepoint "<< AB.back().id << "to place" << currentPlace->id;
-
                 basepointReservoir.clear();
               }
             }
@@ -626,7 +620,6 @@ void PlaceDetector::processImage()
             this->tempwin->id = twindow_counter;
             this->tempwin->totalDiff +=intensityCoh;
             this->tempwin->members.push_back(currentBasePoint);
-
           }
           // add the basepoint to the temporal window
           else
@@ -635,11 +628,8 @@ void PlaceDetector::processImage()
             if(tempwin->checkExtensionStatus(currentBasePoint.id))
             {
               this->tempwin->endPoint = image_counter;
-
               this->tempwin->members.push_back(currentBasePoint);
-
               this->tempwin->totalDiff +=intensityCoh;
-
               basepointReservoir.clear();
             }
             else
@@ -653,32 +643,21 @@ void PlaceDetector::processImage()
               {
 
                 currentPlace->calculateMeanInvariant();
-
-                //qDebug()<<"Current place mean invariant: "<<currentPlace->meanInvariant.rows<<currentPlace->meanInvariant.cols;
-
                 if(currentPlace->memberBPs.size() >= tau_p)
                 {
                   qDebug()<<"New Place";
                   dbmanager.insertPlace(*currentPlace);
-
                   std_msgs::Int16 plID ;
                   plID.data = this->placeID;
-
                   placedetectionPublisher.publish(plID);
-
-                  //qDebug() << "**********"<<currentPlace->id << "\t" <<beginMember << "-" << endMember << "\n";
-
                   this->detectedPlaces.push_back(*currentPlace);
-
                   this->placeID++;
                 }
+
                 delete currentPlace;
-
                 currentPlace = new Place(this->placeID);
-
                 currentPlace->memberBPs = basepointReservoir;
                 basepointReservoir.clear();
-
                 dbmanager.insertTemporalWindow(*tempwin);
 
                 delete tempwin;

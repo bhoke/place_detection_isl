@@ -32,7 +32,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src/bubble)
 MESSAGE( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 
-SET(bubble_space_SOURCES
+SET(SOURCE_FILES
   src/bubble/bubbleprocess.cpp
   src/database/databasemanager.cpp
   src/imageprocess/imageprocess.cpp
@@ -42,7 +42,7 @@ SET(bubble_space_SOURCES
   src/Utility/PlaceDetector.cpp
 )
 
-SET(bubble_space_HEADERS
+SET(HEADER_FILES
   src/bubble/bubbleprocess.h
   src/database/databasemanager.h
   src/imageprocess/imageprocess.h
@@ -56,15 +56,14 @@ ADD_LIBRARY(${PROJECT_NAME} src/detection_main.cpp)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
  opencv_core
- #opencv_imgcodecs
  opencv_imgproc
  opencv_highgui
  ${catkin_LIBRARIES}
 )
 ADD_EXECUTABLE(place_detection_node
  src/detection_main.cpp
- ${bubble_space_SOURCES}
- ${bubble_space_HEADERS}
+ ${SOURCE_FILES}
+ ${HEADER_FILES}
 )
 TARGET_LINK_LIBRARIES(place_detection_node
  ${PROJECT_NAME}
