@@ -144,7 +144,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& original_image)
   if(detector.shouldProcess)
   {
     cv::Mat imm = cv_bridge::toCvCopy(original_image, enc::BGR8)->image;
-    cv::Rect rect(0,0,imm.cols,(imm.rows/2));
+    //cv::Rect rect(0,0,imm.cols,(imm.rows/2));
+    cv::Rect rect(0,0,imm.cols,imm.rows);
     detector.currentImage = imm(rect);//cv_bridge::toCvCopy(original_image, enc::BGR8)->image;
   }
 }
