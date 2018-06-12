@@ -14,4 +14,7 @@ void BasePoint::operator = (const BasePoint& bp)
     this->intensityInvariants = bp.intensityInvariants.clone();
     this->hueInvariants = bp.hueInvariants.clone();
     this->status = bp.status;
+    this->location_x = bp.location_x;
+    this->location_y = bp.location_y;
+    this->pID = bp.pID;
 }

@@ -7,6 +7,7 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS
   image_transport
   roscpp
   std_msgs
+  nav_msgs
 )
 
 FIND_PACKAGE(Qt5 COMPONENTS Core Sql)

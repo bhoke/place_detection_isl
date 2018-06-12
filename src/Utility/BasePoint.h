@@ -21,6 +21,9 @@ public:
     cv::Mat intensityInvariants;
     cv::Mat hueInvariants;
     int status;
+    float location_x;
+    float location_y;
+    int pID;
 };
 
 #endif

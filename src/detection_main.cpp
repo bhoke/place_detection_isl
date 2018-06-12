@@ -16,6 +16,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <std_msgs/Bool.h>
+#include <nav_msgs/Odometry.h>
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -38,6 +39,9 @@ QString mainDirectoryPath;
 QString imagesPath;
 QTextStream strim;
 QFile rawInvariants;
+
+float current_x = 0;
+float current_y = 0;
 
 bool createDirectories(QString previousMemoryPath)
 {
@@ -193,6 +197,13 @@ void startStopCallback(const std_msgs::Int16 startstopSignal)
   else if(startstopSignal.data == 0) detector.shouldProcess = false;  // Pause the node
 }
 
+void odomCallback(const nav_msgs::Odometry& odom_msg)
+{
+    current_x = odom_msg.pose.pose.position.x;
+    current_y = odom_msg.pose.pose.position.y;
+
+}
+
 double compareHKCHISQR(cv::Mat input1, cv::Mat input2)
 {
   if(input1.rows != input2.rows)
@@ -288,6 +299,7 @@ int main (int argc, char** argv)
   image_transport::Subscriber imageSub = it.subscribe(camera_topic.data(), 1, imageCallback,hints);
 
   ros::Subscriber sssub = nh.subscribe("placeDetectionISL/nodecontrol",1, startStopCallback);
+  ros::Subscriber odomSub = nh.subscribe("odom",1, odomCallback);
 
   placedetectionPublisher = nh.advertise<std_msgs::Int16>("placeDetectionISL/placeID",5);
 
@@ -429,6 +441,9 @@ void PlaceDetector::processImage()
     //QString imagefilePath = imagesPath + "/rgb_" + QString::number(image_counter) + ".jpg";
     //imwrite(imagefilePath.toStdString().data(),currentImage);
     currentBasePoint.status = 0;
+    currentBasePoint.location_x = current_x;
+    currentBasePoint.location_y = current_y;
+    currentBasePoint.pID = currentPlace->id;
     //qDebug() << "Current Mean: " << statsVal.mean << "and" << statsVal.variance ;
     /*********************** WE CHECK FOR THE UNINFORMATIVENESS OF THE FRAME   *************************/
     if(statsVal.mean <= this->tau_val_mean || statsVal.variance <= this->tau_val_var)

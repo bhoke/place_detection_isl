@@ -107,59 +107,72 @@ std::vector<bubblePoint> DatabaseManager::readBubble(int type, int number)
 
   return bubble;
 }
+
 bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints)
 {
 
-  if(db.isOpen())
-  {
-    QSqlQuery query;
-
-    query.prepare(QString("REPLACE INTO basepoint(id, avgVal, varVal, avgLas, varLas, invariants, status )" "VALUES(?, ?, ?, ?, ?, ?, ?)"));
-
-    QVariantList ids;
-    QVariantList avgVals;
-    QVariantList varVals;
-    QVariantList avgLass;
-    QVariantList varLass;
-    QVariantList arrs;
-    QVariantList statuses;
-
-    db.transaction();
-
-    for(uint i = 0; i < basepoints.size(); i++)
+    if(db.isOpen())
     {
-      QByteArray arr = mat2ByteArray(basepoints[i].intensityInvariants);
-      ids<<basepoints[i].id;
-      avgVals<<basepoints[i].avgVal;
-      varVals<<basepoints[i].varVal;
-      avgLass<<basepoints[i].avgLas;
-      varLass<<basepoints[i].varLas;
-      arrs<<arr;
-      statuses<<basepoints[i].status;
+        QSqlQuery query;
+
+        query.prepare(QString("replace into basepoint values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+
+        QVariantList ids;
+        QVariantList avgVals;
+        QVariantList varVals;
+        QVariantList avgLass;
+        QVariantList varLass;
+        QVariantList arrs;
+        QVariantList statuses;
+        QVariantList location_x;
+        QVariantList location_y;
+        QVariantList pIDs;
+
+
+        db.transaction();
+
+        for(int i = 0; i < basepoints.size(); i++)
+        {
+            QByteArray arr = mat2ByteArray(basepoints[i].intensityInvariants);
+
+            ids<<basepoints[i].id;
+            avgVals<<basepoints[i].avgVal;
+            varVals<<basepoints[i].varVal;
+            avgLass<<basepoints[i].avgLas;
+            varLass<<basepoints[i].varLas;
+            arrs<<arr;
+            statuses<<basepoints[i].status;
+            location_x << basepoints[i].location_x;
+            location_y << basepoints[i].location_y;
+            pIDs << basepoints[i].pID;
+
+        }
+
+        query.addBindValue(ids);
+        query.addBindValue(avgVals);
+        query.addBindValue(varVals);
+        query.addBindValue(avgLass);
+        query.addBindValue(varLass);
+        query.addBindValue(arrs);
+        query.addBindValue(statuses);
+        query.addBindValue(location_x);
+        query.addBindValue(location_y);
+        query.addBindValue(pIDs);
+
+        if (!query.execBatch()){
+
+            qDebug() << query.lastError();
+
+            return false;
+        }
+        db.commit();
+
+        return true;
+
     }
 
-    query.addBindValue(ids);
-    query.addBindValue(avgVals);
-    query.addBindValue(varVals);
-    query.addBindValue(avgLass);
-    query.addBindValue(varLass);
-    query.addBindValue(arrs);
-    query.addBindValue(statuses);
 
-    if (!query.execBatch()){
-
-      qDebug() << query.lastError();
-
-      return false;
-    }
-    db.commit();
-
-    return true;
-
-  }
-
-
-  return false;
+    return false;
 
 }
 
