@@ -272,8 +272,7 @@ bool DatabaseManager::insertPlace(const Place &place)
   {
     QSqlQuery query;
 
-    query.prepare(QString("REPLACE INTO place(id, meaninvariant, memberIds, memberInvariants)"
-     "VALUES(?, ?, ?, ?)"));
+    query.prepare(QString("replace into place values(?, ?, ?, ?)"));
 
     query.addBindValue(place.id);
     query.addBindValue(arr);
