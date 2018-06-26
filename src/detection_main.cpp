@@ -495,8 +495,11 @@ void PlaceDetector::processImage()
         intensityInvariants.push_back(invariants);
       }
 
-      cv::log(intensityInvariants,currentBasePoint.intensityInvariants);
-      cv::log(hueInvariants,currentBasePoint.hueInvariants);
+      cv::log(intensityInvariants,intensityInvariants);
+      cv::log(hueInvariants,hueInvariants);
+
+      currentBasePoint.intensityInvariants = intensityInvariants.clone();
+      currentBasePoint.hueInvariants = hueInvariants.clone();
 
       // We don't have a previous base point
       if(previousBasePoint.id == 0)
@@ -514,7 +517,7 @@ void PlaceDetector::processImage()
         <<" and " << currentBasePoint.id << ": " <<intensityCoh << std::endl;
         std::cout << "Result of hue coherency function for the " << previousBasePoint.id
         <<" and " << currentBasePoint.id << ": " <<hueCoh << std::endl;
-        if(intensityCoh <= tau_inv && hueCoh <= 50) //&& result > tau_inv2)
+        if(intensityCoh <= tau_inv && hueCoh <= 0.1) //&& result > tau_inv2)
         {
           ///  dbmanager.insertBasePoint(currentBasePoint);
           wholebasepoints.push_back(currentBasePoint);
@@ -579,22 +582,21 @@ void PlaceDetector::processImage()
                 tempwin = 0;
 
                 std::vector<BasePoint> AB;
-                AB.reserve( currentPlace->memberBPs.size() + basepointReservoir.size() ); // preallocate memory
+                AB.reserve(currentPlace->memberBPs.size() + basepointReservoir.size() ); // preallocate memory
                 AB.insert( AB.end(), currentPlace->memberBPs.begin(), currentPlace->memberBPs.end() );
                 AB.insert( AB.end(), basepointReservoir.begin(), basepointReservoir.end() );
                 currentPlace->memberBPs.clear();
                 currentPlace->memberBPs = AB;
-                //qDebug()<< "Adding basepoint "<< AB.back().id << "to place" << currentPlace->id;
                 basepointReservoir.clear();
               }
             }
-          }
+          } // if(tempwin)
           else
           {
             currentPlace->memberBPs.push_back(currentBasePoint);
             //qDebug()<< "Adding basepoint "<< currentBasePoint.id << "to place" << currentPlace->id;
-          }
-        } // COHERENT
+          } // COHERENT
+        }
         // else if(result <= tau_inv2)
         // {
         //     qDebug() << "Skipping the image:" << image_counter << "\n" ;

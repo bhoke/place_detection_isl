@@ -17,7 +17,6 @@ public:
 
 class LearnedPlace : public Place
 {
-//TODO: Add inheriatance for learnedPlace class
 public:
     LearnedPlace();
     LearnedPlace(int id);

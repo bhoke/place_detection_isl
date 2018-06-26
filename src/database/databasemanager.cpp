@@ -69,17 +69,11 @@ bool DatabaseManager::deleteDB()
 {
   // Close database
   db.close();
-
-  #ifdef Q_OS_LINUX
   // NOTE: We have to store database file into user home folder in Linux
   QString path(QDir::home().path());
   path.append(QDir::separator()).append("my.bubbledb.sqlite");
   path = QDir::toNativeSeparators(path);
   return QFile::remove(path);
-  #else
-  // Remove created database binary file
-  return QFile::remove("my.bubbledb.sqlite");
-  #endif
 }
 
 std::vector<bubblePoint> DatabaseManager::readBubble(int type, int number)
@@ -211,8 +205,7 @@ bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
   QByteArray arr4 = mat2ByteArray(learnedplace.memberInvariants);
 
 
-  if(db.isOpen())
-  {
+  if(db.isOpen()){
 
     QSqlQuery query(QSqlDatabase::database("knowledge"));
 
