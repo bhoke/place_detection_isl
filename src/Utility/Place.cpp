@@ -24,6 +24,7 @@ void Place::calculateMeanInvariant()
     bp = this->memberBPs[i];
     cv::vconcat(bp.intensityInvariants,bp.hueInvariants,currentInvariant);
     currentInvariant.copyTo(this->memberInvariants.col(i));
+    this->memberBPIDs.push_back(this->memberBPs[i].id);
   }
   std::cout << "memberInvariants.size() in calculateMeanInvariant() " << memberInvariants.size() << std::endl;
   cv::reduce(this->memberInvariants,this->meanInvariant,1,CV_REDUCE_AVG);

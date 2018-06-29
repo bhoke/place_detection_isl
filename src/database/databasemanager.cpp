@@ -233,7 +233,7 @@ LearnedPlace DatabaseManager::getLearnedPlace(int id)
 
   if(db.isOpen())
   {
-    QSqlQuery query(QString("SELECT* FROM learnedplace WHERE id = %1").arg(id), QSqlDatabase::database("knowledge"));
+    QSqlQuery query(QString("SELECT * FROM learnedplace WHERE id = %1").arg(id), QSqlDatabase::database("knowledge"));
 
     query.next();
 
@@ -256,9 +256,7 @@ LearnedPlace DatabaseManager::getLearnedPlace(int id)
 bool DatabaseManager::insertPlace(const Place &place)
 {
   QByteArray arr = mat2ByteArray(place.meanInvariant);
-
   QByteArray arr2 = mat2ByteArray(cv::Mat(place.memberBPIDs));
-
   QByteArray arr3 = mat2ByteArray(place.memberInvariants);
 
   if(db.isOpen())
@@ -276,7 +274,6 @@ bool DatabaseManager::insertPlace(const Place &place)
     bool ret = query.exec();
 
     return ret;
-
   }
 
   return false;

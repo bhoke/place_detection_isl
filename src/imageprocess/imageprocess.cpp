@@ -67,8 +67,6 @@ std::vector<cv::Mat> ImageProcess::applyFilters(cv::Mat singleChannelImage)
     {
         cv::Mat copyImage = singleChannelImage.clone();
         cv::Mat result;
-        //  Mat blurred;
-        //  cv::medianBlur(copyImage,blurred,3);
         cv::filter2D(copyImage,result,CV_32F,filters[i]);
         results.push_back(result);
     }
@@ -100,7 +98,7 @@ void ImageProcess::scaleResponse(cv::Mat &response)
                 maxResponse += 255.0f * val;
         }
     }
-    response /= (maxResponse - minResponse);
+    response = (response - minResponse) / (maxResponse - minResponse);
 }
 
 void ImageProcess::generateChannelImage(const cv::Mat& rgbimage, int satLower, int valLower, int valUpper,cv::Mat &hueChannel,cv::Mat &valChannel)
