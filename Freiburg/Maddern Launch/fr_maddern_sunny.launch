@@ -18,10 +18,10 @@
 		<param name="sat_upper" type="int" value="255" />
 		<param name="val_lower" type="int" value="10" />
 		<param name="val_upper" type="int" value="255" />
-		<!-- DEBUG MODE SHOULD BE ALWAYS CHECKED -->
+		<!-- DEBUG MODE OPTIONS -->
 		<param name="debug_mode" type="bool" value="true" />
-		<param name="file_path" type="string" value="/home/berkanhoke/Datasets/Freiburg/Maddern/Sunny/" />
+		<param name="file_path" type="string" value="/home/bhoke/Datasets/Freiburg/Maddern/Sunny/" />
 		<param name="use_previous_memory" type="bool" value="false" />
-		<param name="previous_memory_path" type="string" value="/home/berkanhoke/Runs/Maddern/Cloudy/" />
+		<param name="previous_memory_path" type="string" value="/home/bhoke/Runs/Freiburg/Maddern/Cloudy/" />
 	</node>
 </launch>
