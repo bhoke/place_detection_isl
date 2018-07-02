@@ -347,8 +347,6 @@ int main (int argc, char** argv)
         {
           QString filePath = path + files.at(i);
           cv::Mat imm = cv::imread(filePath.toStdString().data(),CV_LOAD_IMAGE_COLOR);
-          //cv::Rect rect(0,0,imm.cols,imm.rows);
-          // detector.currentImage = imm(rect);
           detector.currentImage = imm;
           detector.processImage();
           ros::spinOnce();

@@ -48,6 +48,7 @@ LearnedPlace::LearnedPlace (Place place)
   this->meanInvariant = place.meanInvariant;
   this->memberInvariants = place.memberInvariants;
   this-> memberBPIDs = place.memberBPIDs;
+  this-> memberPlaceIDs.push_back(place.id);
 
   lpCounter++;
 }

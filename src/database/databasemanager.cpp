@@ -197,6 +197,7 @@ int DatabaseManager::getLearnedPlaceMaxID()
 
 bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
 {
+  QByteArray arr = mat2ByteArray(cv::Mat(learnedplace.memberPlaceIDs));
 
   QByteArray arr2 = mat2ByteArray(cv::Mat(learnedplace.memberBPIDs));
 
@@ -212,11 +213,11 @@ bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
     query.prepare("REPLACE INTO learnedplace(id, memberPlaces, memberIds, meanInvariant, memberInvariants)"
     "VALUES(?, ?, ?, ?, ?)");
 
-    query.addBindValue(QVariant(QVariant::String));
-    query.addBindValue(learnedplace.id);
-    query.addBindValue(arr2);
-    query.addBindValue(arr3);
-    query.addBindValue(arr4);
+    query.addBindValue(learnedplace.id); // index 0
+    query.addBindValue(arr); // index 1
+    query.addBindValue(arr2); // index 2
+    query.addBindValue(arr3); //index 3
+    query.addBindValue(arr4); // index 4
 
     bool ret = query.exec();
     if(!ret)
@@ -237,16 +238,19 @@ LearnedPlace DatabaseManager::getLearnedPlace(int id)
 
     query.next();
 
-    int id = query.value(0).toInt();
+    int id = query.value(0).toInt(); // index 0
 
-    QByteArray array2 = query.value(1).toByteArray();
-    place.memberBPIDs = DatabaseManager::byteArray2Mat(array2);
+    QByteArray arr = query.value(1).toByteArray(); // index 1
+    place.memberPlaceIDs = DatabaseManager::byteArray2Mat(arr);
 
-    QByteArray array3 = query.value(2).toByteArray();
-    place.meanInvariant = DatabaseManager::byteArray2Mat(array3);
+    QByteArray arr2 = query.value(2).toByteArray(); //index 2
+    place.memberBPIDs = DatabaseManager::byteArray2Mat(arr2);
 
-    QByteArray array4 = query.value(3).toByteArray();
-    place.memberInvariants = DatabaseManager::byteArray2Mat(array4);
+    QByteArray arr3 = query.value(3).toByteArray(); //index 3
+    place.meanInvariant = DatabaseManager::byteArray2Mat(arr3);
+
+    QByteArray arr4 = query.value(3).toByteArray(); //index 4
+    place.memberInvariants = DatabaseManager::byteArray2Mat(arr4);
 
     place.id = id;
   }
