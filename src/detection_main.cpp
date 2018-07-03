@@ -41,18 +41,13 @@ QFile rawInvariants;
 
 bool createDirectories(QString previousMemoryPath)
 {
-  QDir dir(QDir::home());
+  QDir dir(QDir::homePath());
+  //QString mainDirectoryName = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
+  QString mainDirectoryPath = QString::fromStdString(detector.debugFilePath);
+  mainDirectoryPath.replace(QString::fromStdString("Datasets"),QString::fromStdString("Runs"));
+  if(!dir.mkpath(mainDirectoryPath)) return false;
 
-  QString mainDirectoryName = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
-  // QStringList mainDirList = QString::fromStdString(detector.debugFilePath).split("Datasets");
-  // qDebug() << mainDirList ;
-  if(!dir.mkdir(mainDirectoryName)) return false;
-  dir.cd(mainDirectoryName);
-
-  mainDirectoryPath = dir.path();
-  qDebug()<<"Main Directory Path"<<mainDirectoryPath;
-
-  QDir mainDir = QDir::homePath() + "/" + mainDirectoryName;
+  qDebug()<<"Main Directory Path" << mainDirectoryPath;
 
   QString databasepath = QDir::homePath() + "/emptydb";
   QString detectedPlacesdbpath = databasepath + "/detected_places.db";
