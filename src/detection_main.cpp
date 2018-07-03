@@ -363,6 +363,7 @@ int main (int argc, char** argv)
     } // end if detector.should Process
   } //  while(ros::ok())
 
+  if(ros::ok()) ros::shutdown();
   rawInvariants.close();
   if(detector.currentPlace)
   {
