@@ -364,11 +364,9 @@ int main (int argc, char** argv)
           detector.currentPlace = 0;
           detector.shouldProcess = false;
           ros::shutdown();
-          ros::spin();
         } // end if detector.currentPlace
       } // end Debug Mode
     } // end if detector.should Process
-
   } //  while(ros::ok())
 
   rawInvariants.close();
