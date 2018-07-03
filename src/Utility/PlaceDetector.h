@@ -25,8 +25,8 @@ public:
     int tau_n;
     int tau_p;
     double tau_avgdiff;
-    double tau_inv;
-    double tau_inv2;
+    double tau_kappa;
+    double tau_kappaHue;
 
     int image_width;
     int image_height;

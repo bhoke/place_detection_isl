@@ -118,8 +118,8 @@ bool saveParameters(QString filepath)
     str<<"tau_w "<<detector.tau_w<<"\n";
     str<<"tau_n "<<detector.tau_n<<"\n";
     str<<"tau_p "<<detector.tau_p<<"\n";
-    str<<"tau_inv "<<detector.tau_inv<<"\n";
-    str<<"tau_inv2 "<<detector.tau_inv2<<"\n";
+    str<<"tau_kappa "<<detector.tau_kappa <<"\n";
+    str<<"tau_kappaHue "<<detector.tau_kappaHue<<"\n";
     str<<"tau_avgdiff "<<detector.tau_avgdiff<<"\n";
     str<<"focal_length_pixels "<<detector.focalLengthPixels<<"\n";
     str<<"tau_val_mean "<<detector.tau_val_mean<<"\n";
@@ -249,8 +249,8 @@ int main (int argc, char** argv)
   pnh.getParam("tau_w",detector.tau_w);
   pnh.getParam("tau_n",detector.tau_n);
   pnh.getParam("tau_p",detector.tau_p);
-  pnh.getParam("tau_inv",detector.tau_inv);
-  pnh.getParam("tau_inv2",detector.tau_inv2);
+  pnh.getParam("tau_kappa",detector.tau_kappa);
+  pnh.getParam("tau_kappaHue",detector.tau_kappaHue);
   pnh.getParam("tau_avgdiff",detector.tau_avgdiff);
   pnh.getParam("camera_topic",camera_topic);
   pnh.getParam("image_width",img_width);
@@ -514,10 +514,9 @@ void PlaceDetector::processImage()
         std::cout << "Result of intensity coherency function for the " << previousBasePoint.id
         <<" and " << currentBasePoint.id << ": " <<intensityCoh << std::endl;
         std::cout << "Result of hue coherency function for the " << previousBasePoint.id
-        <<" and " << currentBasePoint.id << ": " <<hueCoh << std::endl;
-        if(intensityCoh <= tau_inv && hueCoh <= 0.1) //&& result > tau_inv2)
+        <<" and " << currentBasePoint.id << ": " << hueCoh << std::endl;
+        if(intensityCoh <= tau_kappa && hueCoh <= tau_kappaHue)
         {
-          ///  dbmanager.insertBasePoint(currentBasePoint);
           wholebasepoints.push_back(currentBasePoint);
           qDebug() << currentBasePoint.id << " and " << previousBasePoint.id << "are coherent \n";
           /// If we have a temporal window
@@ -595,7 +594,7 @@ void PlaceDetector::processImage()
             //qDebug()<< "Adding basepoint "<< currentBasePoint.id << "to place" << currentPlace->id;
           } // COHERENT
         }
-        // else if(result <= tau_inv2)
+        // else if(result <= tau_kappaHue)
         // {
         //     qDebug() << "Skipping the image:" << image_counter << "\n" ;
         //     similar = true;

@@ -6,8 +6,8 @@
 		<param name="tau_n" type="int" value="1" />
 		<param name="tau_p" type="int" value="15" />
 		<param name="tau_avgdiff" type="double" value="0.15" />
-		<param name="tau_inv" type="double" value="30" />
-		<param name="tau_inv2" type="double" value="0.0" />
+		<param name="tau_kappa" type="double" value="1.0" />
+		<param name="tau_kappaHue" type="double" value="1.0" />
 		<param name="camera_topic" type="string" value="/axis/image_raw" />
 		<param name="image_width" type="int" value="640" />
 		<param name="image_height" type="int" value="480" />
