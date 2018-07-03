@@ -20,7 +20,7 @@
 		<param name="val_upper" type="int" value="255" />
 		<!-- DEBUG MODE OPTIONS -->
 		<param name="debug_mode" type="bool" value="true" />
-		<param name="file_path" type="string" value="/home/bhoke/Datasets/Saarbrucken/Maddern/Cloudy/" />
+		<param name="file_path" type="string" value="$(env HOME)/Datasets/Saarbrucken/Maddern/Cloudy/" />
 		<param name="use_previous_memory" type="bool" value="false" />
 		<param name="previous_memory_path" type="string" value="" />
 	</node>

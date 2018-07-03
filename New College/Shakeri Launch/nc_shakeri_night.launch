@@ -20,8 +20,8 @@
 		<param name="val_upper" type="int" value="255" />
 		<!-- DEBUG MODE OPTIONS -->
 		<param name="debug_mode" type="bool" value="true" />
-		<param name="file_path" type="string" value="/home/bhoke/Datasets/NC/Shakeri/Night/" />
+		<param name="file_path" type="string" value="$(env HOME)/Datasets/NC/Shakeri/Night/" />
 		<param name="use_previous_memory" type="bool" value="true" />
-		<param name="previous_memory_path" type="string" value="/home/bhoke/Runs/NC/Shakeri/Sunny/" />
+		<param name="previous_memory_path" type="string" value="$(env HOME)/Runs/NC/Shakeri/Sunny/" />
 	</node>
 </launch>
