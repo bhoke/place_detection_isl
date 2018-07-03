@@ -358,7 +358,6 @@ int main (int argc, char** argv)
           delete detector.currentPlace;
           detector.currentPlace = 0;
           detector.shouldProcess = false;
-          ros::shutdown();
         } // end if detector.currentPlace
       } // end Debug Mode
     } // end if detector.should Process
