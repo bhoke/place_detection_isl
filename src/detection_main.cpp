@@ -43,7 +43,7 @@ bool createDirectories(QString previousMemoryPath)
 {
   QDir dir(QDir::homePath());
   //QString mainDirectoryName = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
-  QString mainDirectoryPath = QString::fromStdString(detector.debugFilePath);
+  mainDirectoryPath = QString::fromStdString(detector.debugFilePath);
   mainDirectoryPath.replace(QString::fromStdString("Datasets"),QString::fromStdString("Runs"));
   if(!dir.mkpath(mainDirectoryPath)) return false;
 
