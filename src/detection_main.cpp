@@ -44,25 +44,15 @@ bool createDirectories(QString previousMemoryPath)
   QDir dir(QDir::home());
 
   QString mainDirectoryName = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
-
+  // QStringList mainDirList = QString::fromStdString(detector.debugFilePath).split("Datasets");
+  // qDebug() << mainDirList ;
   if(!dir.mkdir(mainDirectoryName)) return false;
-
   dir.cd(mainDirectoryName);
 
   mainDirectoryPath = dir.path();
   qDebug()<<"Main Directory Path"<<mainDirectoryPath;
 
   QDir mainDir = QDir::homePath() + "/" + mainDirectoryName;
-
-  QString imageDirectory = "images";
-
-  if(!mainDir.mkdir(imageDirectory)) return false;
-
-  mainDir.cd(imageDirectory);
-
-  imagesPath = mainDir.path();
-
-  qDebug()<<"Image directory path"<<imagesPath;
 
   QString databasepath = QDir::homePath() + "/emptydb";
   QString detectedPlacesdbpath = databasepath + "/detected_places.db";
@@ -233,7 +223,7 @@ void writeInvariant(cv::Mat inv, int count)
 int main (int argc, char** argv)
 {
   // Initialize ROS
-  ros::init (argc, argv, "placeDetectionISL");
+  ros::init (argc, argv, "place_detection_isl");
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");
   image_transport::ImageTransport it(nh);
@@ -266,9 +256,9 @@ int main (int argc, char** argv)
   pnh.getParam("debug_mode",detector.debugMode);
   pnh.getParam("file_path", detector.debugFilePath);
 
-  qDebug()<<"Saturation and Value thresholds"<<detector.satLower<<detector.valLower<<detector.valUpper<<detector.tau_avgdiff;
+  qDebug()<<"Saturation and Value thresholds" << detector.satLower << detector.valLower<<detector.valUpper;
 
-  if(detector.debugMode) qDebug()<<"Debug mode is on!! File Path"<<QString::fromStdString(detector.debugFilePath);
+  if(detector.debugMode) qDebug() << "Debug mode is on!! File Path" << QString::fromStdString(detector.debugFilePath);
 
   pnh.getParam("use_previous_memory",detector.usePreviousMemory);
 
@@ -284,11 +274,11 @@ int main (int argc, char** argv)
 
   image_transport::Subscriber imageSub = it.subscribe(camera_topic.data(), 1, imageCallback,hints);
 
-  ros::Subscriber sssub = nh.subscribe("placeDetectionISL/nodecontrol",1, startStopCallback);
+  ros::Subscriber sssub = nh.subscribe("place_detection_isl/nodecontrol",1, startStopCallback);
 
-  placedetectionPublisher = nh.advertise<std_msgs::Int16>("placeDetectionISL/placeID",5);
+  placedetectionPublisher = nh.advertise<std_msgs::Int16>("place_detection_isl/placeID",5);
 
-  filePathPublisher = nh.advertise<std_msgs::String>("placeDetectionISL/mainFilePath",2);
+  filePathPublisher = nh.advertise<std_msgs::String>("place_detection_isl/mainFilePath",2);
 
   ros::Rate loop(50);
 
@@ -348,42 +338,37 @@ int main (int argc, char** argv)
           detector.currentImage = imm;
           detector.processImage();
           ros::spinOnce();
-
-          loop.sleep();
-
           if(!ros::ok())
           break;
         }
 
-        if(detector.currentPlace && detector.currentPlace->id > 0 && detector.currentPlace->memberBPs.size() > 0)
+        if(detector.currentPlace)
         {
           qDebug()<<"Evaluate last place and shutdown";
 
           detector.currentPlace->calculateMeanInvariant();
-
           if(detector.currentPlace->memberBPs.size() >= detector.tau_p)
           {
             dbmanager.insertPlace(*detector.currentPlace);
 
             detector.detectedPlaces.push_back(*detector.currentPlace);
-
             std_msgs::Int16 plID;
             plID.data = detector.placeID;
 
             placedetectionPublisher.publish(plID);
 
             ros::spinOnce();
-
             detector.placeID++;
           }
-
           delete detector.currentPlace;
           detector.currentPlace = 0;
           detector.shouldProcess = false;
           ros::shutdown();
+          ros::spin();
         } // end if detector.currentPlace
       } // end Debug Mode
     } // end if detector.should Process
+
   } //  while(ros::ok())
 
   rawInvariants.close();
@@ -394,7 +379,7 @@ int main (int argc, char** argv)
   }
 
   // Insert basepoints to the database
-  if(detector.wholebasepoints.size()>0)
+  if(detector.wholebasepoints.size() > 0)
   dbmanager.insertBasePoints(detector.wholebasepoints);
 
   dbmanager.closeDB();
