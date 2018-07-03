@@ -282,8 +282,6 @@ int main (int argc, char** argv)
   std::vector<int> filtersToRead = {0,6,12,18,36};
   ImageProcess::readFilters(filterPath,filtersToRead);
 
-  cv::destroyAllWindows();
-
   image_transport::Subscriber imageSub = it.subscribe(camera_topic.data(), 1, imageCallback,hints);
 
   ros::Subscriber sssub = nh.subscribe("placeDetectionISL/nodecontrol",1, startStopCallback);

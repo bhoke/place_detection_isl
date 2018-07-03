@@ -11,7 +11,7 @@
 		<param name="camera_topic" type="string" value="/axis/image_raw" />
 		<param name="image_width" type="int" value="640" />
 		<param name="image_height" type="int" value="480" />
-		<param name="focal_length_pixels" type="int" value="550" />
+		<param name="focal_length_pixels" type="int" value="466" />
 		<param name="tau_val_mean" type="double" value="0.01" />
 		<param name="tau_val_var" type="double" value="0.01" />
 		<param name="sat_lower" type="int" value="10" />
