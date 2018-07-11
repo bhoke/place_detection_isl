@@ -47,7 +47,8 @@ bool createDirectories(QString previousMemoryPath)
   mainDirectoryPath.replace(QString::fromStdString("Datasets"),QString::fromStdString("Runs"));
   if(!dir.mkpath(mainDirectoryPath)) return false;
 
-  qDebug()<<"Main Directory Path" << mainDirectoryPath;
+  qDebug()<<"Main Directory Path: " << mainDirectoryPath;
+  qDebug()<<"Previous Memory Path: " << previousMemoryPath;
 
   QString databasepath = QDir::homePath() + "/emptydb";
   QString detectedPlacesdbpath = databasepath + "/detected_places.db";
