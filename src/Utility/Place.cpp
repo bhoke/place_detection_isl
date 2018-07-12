@@ -15,11 +15,11 @@ void Place::calculateMeanInvariant()
 {
   BasePoint bp;
   cv::Mat currentInvariant;
-  int noBPs = this->memberBPs.size();
+  size_t noBPs = this->memberBPs.size();
   this-> memberInvariants = cv::Mat(600,noBPs,CV_32FC1);
   //TODO: All terms contain 600(invarint size) should be adaptive to harmonics and filterCount
 
-  for(size_t i = 0; i < noBPs; i++)
+  for(int i = 0; i < noBPs; i++)
   {
     bp = this->memberBPs[i];
     cv::vconcat(bp.intensityInvariants,bp.hueInvariants,currentInvariant);

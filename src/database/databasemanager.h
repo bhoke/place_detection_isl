@@ -30,8 +30,6 @@ public:
 
     void closeDB();
 
-    bool deleteDB();
-
     bool isOpen();
 
     bool insertInvariants(int type,int number, std::vector< std::vector<float> > invariants);
@@ -47,6 +45,8 @@ public:
     bool insertPlace(const Place& place);
 
     bool insertLearnedPlace(const LearnedPlace& learnedplace);
+
+    bool updateLearnedPlace(int idToBeUpdated, const LearnedPlace updatedPlace);
 
     int getLearnedPlaceMaxID();
 

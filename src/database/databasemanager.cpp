@@ -8,21 +8,18 @@
 #include <QVector>
 #include <QDataStream>
 
-static QVector<int> placeLabels;
-
-DatabaseManager::DatabaseManager()
-{
+DatabaseManager::DatabaseManager(){
 }
-bool DatabaseManager::openDB(QString filePath, QString connectionName)
-{
+
+bool DatabaseManager::openDB(QString filePath, QString connectionName){
 
   db = QSqlDatabase::addDatabase("QSQLITE",connectionName);
   QString path = QDir::toNativeSeparators(filePath);
 
   db.setDatabaseName(path);
   return db.open();
-
 }
+
 bool DatabaseManager::openDB(QString filePath)
 {
   if(!db.isOpen())
@@ -65,17 +62,6 @@ void DatabaseManager::closeDB()
   if(db.isOpen()) db.close();
 }
 
-bool DatabaseManager::deleteDB()
-{
-  // Close database
-  db.close();
-  // NOTE: We have to store database file into user home folder in Linux
-  QString path(QDir::home().path());
-  path.append(QDir::separator()).append("my.bubbledb.sqlite");
-  path = QDir::toNativeSeparators(path);
-  return QFile::remove(path);
-}
-
 std::vector<bubblePoint> DatabaseManager::readBubble(int type, int number)
 {
   QSqlQuery query(QString("SELECT * FROM bubble WHERE type = %1 AND number = %2").arg(type).arg(number));
@@ -85,24 +71,15 @@ std::vector<bubblePoint> DatabaseManager::readBubble(int type, int number)
   while(query.next())
   {
     bubblePoint pt ;
-
     pt.panAng = query.value(3).toInt();
-
     pt.tiltAng = query.value(4).toInt();
-
     pt.val = query.value(5).toDouble();
-
     bubble.push_back(pt);
-
-    //qDebug()<<"value is"<<query.value(4).toDouble();
   }
-  // select * from bubble where number = 2 and type = 0
-
-
   return bubble;
 }
-bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints)
-{
+
+bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints){
 
   if(db.isOpen())
   {
@@ -141,24 +118,19 @@ bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints)
     query.addBindValue(statuses);
 
     if (!query.execBatch()){
-
       qDebug() << query.lastError();
-
       return false;
     }
+
     db.commit();
 
     return true;
 
   }
-
-
   return false;
-
 }
 
-bool DatabaseManager::insertTemporalWindow(const TemporalWindow &twindow)
-{
+bool DatabaseManager::insertTemporalWindow(const TemporalWindow &twindow){
 
   if(db.isOpen())
   {
@@ -178,8 +150,7 @@ bool DatabaseManager::insertTemporalWindow(const TemporalWindow &twindow)
   return false;
 }
 
-int DatabaseManager::getLearnedPlaceMaxID()
-{
+int DatabaseManager::getLearnedPlaceMaxID(){
   if(db.isOpen())
   {
     QSqlQuery query(QString("SELECT MAX(id) FROM learnedplace"),QSqlDatabase::database("knowledge"));
@@ -195,8 +166,7 @@ int DatabaseManager::getLearnedPlaceMaxID()
   }
 }
 
-bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
-{
+bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace){
   QByteArray arr = mat2ByteArray(cv::Mat(learnedplace.memberPlaceIDs));
 
   QByteArray arr2 = mat2ByteArray(cv::Mat(learnedplace.memberBPIDs));
@@ -228,8 +198,8 @@ bool DatabaseManager::insertLearnedPlace(const LearnedPlace &learnedplace)
   return false;
 
 }
-LearnedPlace DatabaseManager::getLearnedPlace(int id)
-{
+
+LearnedPlace DatabaseManager::getLearnedPlace(int id){
   LearnedPlace place;
 
   if(db.isOpen())
@@ -257,8 +227,7 @@ LearnedPlace DatabaseManager::getLearnedPlace(int id)
   return place;
 }
 
-bool DatabaseManager::insertPlace(const Place &place)
-{
+bool DatabaseManager::insertPlace(const Place &place){
   QByteArray arr = mat2ByteArray(place.meanInvariant);
   QByteArray arr2 = mat2ByteArray(cv::Mat(place.memberBPIDs));
   QByteArray arr3 = mat2ByteArray(place.memberInvariants);
@@ -268,7 +237,7 @@ bool DatabaseManager::insertPlace(const Place &place)
     QSqlQuery query;
 
     query.prepare(QString("REPLACE INTO place(id, meaninvariant, memberIds, memberInvariants)"
-     "VALUES(?, ?, ?, ?)"));
+    "VALUES(?, ?, ?, ?)"));
 
     query.addBindValue(place.id);
     query.addBindValue(arr);
@@ -282,8 +251,8 @@ bool DatabaseManager::insertPlace(const Place &place)
 
   return false;
 }
-cv::Mat DatabaseManager::getPlaceMeanInvariant(int id)
-{
+
+cv::Mat DatabaseManager::getPlaceMeanInvariant(int id){
   if(db.isOpen())
   {
     QSqlQuery query(QString("SELECT meaninvariant FROM place WHERE id = %1").arg(id));
@@ -302,8 +271,7 @@ cv::Mat DatabaseManager::getPlaceMeanInvariant(int id)
   }
 
 }
-cv::Mat DatabaseManager::getPlaceMemberIds(int id)
-{
+cv::Mat DatabaseManager::getPlaceMemberIds(int id){
   if(db.isOpen())
   {
     QSqlQuery query(QString("SELECT memberIds FROM place WHERE id = %1").arg(id));
@@ -320,13 +288,13 @@ cv::Mat DatabaseManager::getPlaceMemberIds(int id)
     return cv::Mat();
   }
 }
-Place DatabaseManager::getPlace(int id)
-{
+
+Place DatabaseManager::getPlace(int id){
   Place place;
 
   if(db.isOpen())
   {
-    QSqlQuery query(QString("SELECT* FROM place WHERE id = %1").arg(id));
+    QSqlQuery query(QString("SELECT * FROM place WHERE id = %1").arg(id));
 
     query.next();
 
@@ -343,8 +311,8 @@ Place DatabaseManager::getPlace(int id)
   }
   return place;
 }
-QByteArray DatabaseManager::mat2ByteArray(const cv::Mat &image)
-{
+
+QByteArray DatabaseManager::mat2ByteArray(const cv::Mat &image){
   QByteArray byteArray;
   QDataStream stream(&byteArray,QIODevice::WriteOnly);
   stream << image.type();
@@ -355,8 +323,8 @@ QByteArray DatabaseManager::mat2ByteArray(const cv::Mat &image)
   stream << data;
   return byteArray;
 }
-cv::Mat DatabaseManager::byteArray2Mat(const QByteArray & byteArray)
-{
+
+cv::Mat DatabaseManager::byteArray2Mat(const QByteArray & byteArray){
   QDataStream stream(byteArray);
   int matType, rows, cols;
   QByteArray data;
@@ -366,4 +334,33 @@ cv::Mat DatabaseManager::byteArray2Mat(const QByteArray & byteArray)
   stream >> data;
   cv::Mat mat(rows, cols, matType, (void*)data.data() );
   return mat.clone();
+}
+
+bool DatabaseManager::updateLearnedPlace(int idToBeUpdated, const LearnedPlace updatedPlace){
+  QByteArray arr = mat2ByteArray(cv::Mat(updatedPlace.memberPlaceIDs));
+  QByteArray arr2 = mat2ByteArray(cv::Mat(updatedPlace.memberBPIDs));
+  QByteArray arr3 = mat2ByteArray(updatedPlace.meanInvariant);
+  QByteArray arr4 = mat2ByteArray(updatedPlace.memberInvariants);
+
+  if(db.isOpen()){
+
+    QSqlQuery query(QSqlDatabase::database("knowledge"));
+
+    // query.prepare(QString("UPDATE learnedplace SET(memberPlaces= %1 memberIds= %2 meanInvariant=%3 memberInvariants=%4 WHERE id=%5")));
+    query.prepare("UPDATE learnedplace SET memberPlaces = :memberPlaces, memberIds = :memberIds,meanInvariant = :meanInvariant,memberInvariants = :memberInvariants WHERE id = :id");
+    query.bindValue(":memberPlaces", arr);
+    query.bindValue(":memberIds", arr2) ;
+    query.bindValue(":meanInvariant", arr3);
+    query.bindValue(":memberInvariants", arr4);
+    query.bindValue(":id", idToBeUpdated);
+
+    bool ret = query.exec();
+    if(!ret)
+    qDebug() << "Warning: LearnedPlace object could not be updated! \n" << query.lastError() ;
+    return ret;
+  }
+
+  std::cout << "Warning: LearnedPlace database could not be opened!" << std::endl;
+  return false;
+
 }
