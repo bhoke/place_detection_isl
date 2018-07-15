@@ -84,45 +84,12 @@ std::vector<bubblePoint> bubbleProcess::convertGrayImage2Bub(cv::Mat grayImage)
   return result;
 }
 
-std::vector<bubblePoint> bubbleProcess::readBubble(QFile *file){
-
-  QTextStream stream(file);
-
-  std::vector<bubblePoint> result;
-
-  if(!file->isOpen()) return result;
-
-  QString line = stream.readLine();
-
-  while(line != NULL)
-  {
-    bubblePoint pt;
-
-    QStringList lt = line.split(" ");
-
-    if(lt.size() == 3){
-
-      pt.panAng = lt[0].toInt();
-      pt.tiltAng= lt[1].toInt();
-      pt.val = lt[2].toDouble();
-
-      // if val is in normal ranges save it
-      if(pt.val < 1 && pt.val > 0){
-        // pt.val = pt.val *30;
-        result.push_back(pt);
-      }
-    }
-    line = stream.readLine();
-  }
-  return result;
-}
-
 std::vector<bubblePoint> bubbleProcess::reduceBubble(std::vector<bubblePoint> bubble)
 {
   std::vector<bubblePoint> result;
 
-  double vals[360][360];
-  double counts[360][360];
+  float vals[360][360];
+  float counts[360][360];
 
   for(int i = 0; i < 360; i++)
   {

@@ -62,23 +62,6 @@ void DatabaseManager::closeDB()
   if(db.isOpen()) db.close();
 }
 
-std::vector<bubblePoint> DatabaseManager::readBubble(int type, int number)
-{
-  QSqlQuery query(QString("SELECT * FROM bubble WHERE type = %1 AND number = %2").arg(type).arg(number));
-
-  std::vector<bubblePoint> bubble;
-
-  while(query.next())
-  {
-    bubblePoint pt ;
-    pt.panAng = query.value(3).toInt();
-    pt.tiltAng = query.value(4).toInt();
-    pt.val = query.value(5).toDouble();
-    bubble.push_back(pt);
-  }
-  return bubble;
-}
-
 bool DatabaseManager::insertBasePoints(const std::vector<BasePoint> basepoints){
 
   if(db.isOpen())

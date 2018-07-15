@@ -7,7 +7,6 @@ TemporalWindow::TemporalWindow()
     tau_w = 0;
     tau_n = 0;
     id = -1;
-    totalDiff = 0.0;
 }
 
 bool TemporalWindow::checkExtensionStatus(uint currentID)

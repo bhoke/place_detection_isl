@@ -34,8 +34,6 @@ public:
 
     bool insertInvariants(int type,int number, std::vector< std::vector<float> > invariants);
 
-    std::vector<bubblePoint> readBubble(int type, int number);
-
     bool insertTemporalWindow(const TemporalWindow& twindow);
 
     bool insertBasePoint(const BasePoint& basepoint);

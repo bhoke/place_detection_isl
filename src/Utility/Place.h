@@ -15,8 +15,7 @@ public:
     void calculateMeanInvariant();
 };
 
-class LearnedPlace : public Place
-{
+class LearnedPlace : public Place{
 public:
     LearnedPlace();
     LearnedPlace(int id);
@@ -28,8 +27,7 @@ public:
     static int lpCounter;
 };
 
-class subPlace: public Place
-{
+class subPlace: public Place{
 public:
     subPlace();
     subPlace(int id);

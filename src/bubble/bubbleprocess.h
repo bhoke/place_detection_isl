@@ -13,12 +13,12 @@
 struct bubblePoint{
     int panAng;
     int tiltAng;
-    double val;
+    float val;
 };
 struct bubbleStatistics
 {
-    double mean;// mean of the bubble Surface
-    double variance;// variance of the bubble Surface
+    float mean;// mean of the bubble Surface
+    float variance;// variance of the bubble Surface
 };
 
 struct DFCoefficients
@@ -41,8 +41,6 @@ public:
     // Reduces the number of points in a bubble by combining points falling in the same patch
     static std::vector<bubblePoint> reduceBubble(std::vector<bubblePoint>bubble);
 
-    // Reads the bubble
-    static std::vector<bubblePoint> readBubble(QFile* file);
     static std::vector<bubblePoint> convertGrayImage2Bub(cv::Mat grayImage);
     static void calculateImagePanAngles(int focalLengthPixels,int imageWidth);
     static void calculateImageTiltAngles(int focalLengthPixels,int imageHeight);

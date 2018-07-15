@@ -42,7 +42,6 @@ QFile rawInvariants;
 bool createDirectories(QString previousMemoryPath)
 {
   QDir dir(QDir::homePath());
-  //QString mainDirectoryName = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
   mainDirectoryPath = QString::fromStdString(detector.debugFilePath);
   mainDirectoryPath.replace(QString::fromStdString("Datasets"),QString::fromStdString("Runs"));
   if(!dir.mkpath(mainDirectoryPath)) return false;
@@ -106,7 +105,6 @@ bool saveParameters(QString filepath)
     str<<"tau_p "<<detector.tau_p<<"\n";
     str<<"tau_kappa "<<detector.tau_kappa <<"\n";
     str<<"tau_kappaHue "<<detector.tau_kappaHue<<"\n";
-    str<<"tau_avgdiff "<<detector.tau_avgdiff<<"\n";
     str<<"focal_length_pixels "<<detector.focalLengthPixels<<"\n";
     str<<"tau_val_mean "<<detector.tau_val_mean<<"\n";
     str<<"tau_val_var "<<detector.tau_val_var<<"\n";
@@ -198,24 +196,6 @@ double compareHKCHISQR(cv::Mat input1, cv::Mat input2)
   return summ;
 }
 
-void writeInvariant(cv::Mat inv, int count)
-{
-  QString pathh = QDir::homePath();
-  pathh.append("/invariants_").append(QString::number(count)).append(".txt");
-  QFile file(pathh);
-
-  if(file.open(QFile::WriteOnly))
-  {
-    QTextStream str(&file);
-
-    for(int i = 0; i < inv.rows; i++)
-    {
-      str<<inv.at<float>(i,0)<<"\n";
-    }
-    file.close();
-  }
-}
-
 int main (int argc, char** argv)
 {
   // Initialize ROS
@@ -224,6 +204,7 @@ int main (int argc, char** argv)
   ros::NodeHandle pnh("~");
   image_transport::ImageTransport it(nh);
   image_transport::TransportHints hints("compressed");
+  bool clusterPlace;
 
   int img_width;
   int img_height;
@@ -237,7 +218,6 @@ int main (int argc, char** argv)
   pnh.getParam("tau_p",detector.tau_p);
   pnh.getParam("tau_kappa",detector.tau_kappa);
   pnh.getParam("tau_kappaHue",detector.tau_kappaHue);
-  pnh.getParam("tau_avgdiff",detector.tau_avgdiff);
   pnh.getParam("camera_topic",camera_topic);
   pnh.getParam("image_width",img_width);
   pnh.getParam("image_height",img_height);
@@ -247,6 +227,7 @@ int main (int argc, char** argv)
   pnh.getParam("sat_lower",detector.satLower);
   pnh.getParam("val_lower",detector.valLower);
   detector.valUpper = 250;
+
   /***** GET THE DEBUG MODE ****************/
 
   pnh.getParam("debug_mode",detector.debugMode);
@@ -418,14 +399,12 @@ void PlaceDetector::processImage()
         this->tempwin->startPoint = image_counter;
         this->tempwin->endPoint = image_counter;
         this->tempwin->id = twindow_counter;
-        this->tempwin->totalDiff = 0.99;
 
         this->tempwin->members.push_back(currentBasePoint);
       }
       else
       {
         this->tempwin->endPoint = image_counter;
-        this->tempwin->totalDiff += 0.99;
         this->tempwin->members.push_back(currentBasePoint);
       }
 
@@ -508,14 +487,11 @@ void PlaceDetector::processImage()
             // Temporal window will not extend anymore, we should check whether it is really a temporal window or not
             else
             {
-              float area = this->tempwin->totalDiff/(tempwin->endPoint - tempwin->startPoint+1);
               // This is a valid temporal window
-              if(tempwin->endPoint - tempwin->startPoint >= tau_w )//&& area>= tau_avgdiff)
+              if(tempwin->endPoint - tempwin->startPoint >= tau_w )
               {
                 qDebug()<<"New Place";
                 currentPlace->calculateMeanInvariant();
-
-                //qDebug()<<"Current place mean invariant: "<<currentPlace->meanInvariant.rows<<currentPlace->meanInvariant.cols<<currentPlace->meanInvariant.at<float>(50,0);
 
                 if(currentPlace->memberBPs.size() >= tau_p){
 
@@ -594,7 +570,6 @@ void PlaceDetector::processImage()
             this->tempwin->startPoint = image_counter;
             this->tempwin->endPoint = image_counter;
             this->tempwin->id = twindow_counter;
-            this->tempwin->totalDiff +=intensityCoh;
             this->tempwin->members.push_back(currentBasePoint);
           }
           // add the basepoint to the temporal window
@@ -605,17 +580,12 @@ void PlaceDetector::processImage()
             {
               this->tempwin->endPoint = image_counter;
               this->tempwin->members.push_back(currentBasePoint);
-              this->tempwin->totalDiff +=intensityCoh;
               basepointReservoir.clear();
             }
             else
             {
-              float avgdiff;
-
-              avgdiff = this->tempwin->totalDiff/(tempwin->endPoint - tempwin->startPoint+1);
-              qDebug() << "Avg Diff here" << avgdiff;
               // This is a valid temporal window
-              if(tempwin->endPoint - tempwin->startPoint >= tau_w && avgdiff >= tau_avgdiff)
+              if(tempwin->endPoint - tempwin->startPoint >= tau_w)
               {
 
                 currentPlace->calculateMeanInvariant();
